@@ -27,7 +27,7 @@
     .pillrow{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.035);color:#cbd7f3;font-size:12px}.pill.good{border-color:rgba(52,211,153,.42);color:#b8f7d8}.pill.bad{border-color:rgba(251,113,133,.45);color:#fecdd3}.status{margin-top:14px}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--line);background:rgba(255,255,255,.05);padding:2px 6px;border-radius:6px;color:#d9e5ff}
     .fileList{display:grid;gap:9px;margin-top:10px}.fileCard{padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}.fileCard b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fileCard .meta{margin-top:5px;color:var(--muted);font-size:12px;line-height:1.42}.fileCard .meta strong{color:#d7e1fb;font-weight:700}
     .mainPanel{min-height:636px}.sectionHead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}.sectionHead h2{margin:0;font-size:22px}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:14px}.empty{min-height:420px;display:grid;place-items:center;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:20px;background:rgba(255,255,255,.018);padding:24px}.empty b{display:block;color:#e9efff;font-size:20px;margin-bottom:8px}
-    .hidden{display:none!important}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.12);max-height:32vh}table{border-collapse:collapse;width:100%;min-width:760px}th,td{border-bottom:1px solid rgba(37,48,75,.75);padding:8px 10px;text-align:left;font-size:12.5px;vertical-align:middle}th{position:sticky;top:0;background:#131c31;color:#bfcbee;z-index:1}tr:last-child td{border-bottom:0}td input[type="text"]{width:100%;min-width:170px;background:#0c1324;border:1px solid #2c3857;border-radius:10px;color:var(--text);padding:7px 9px;outline:none}td input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(125,211,252,.12)}td .small{font-size:12px;color:var(--muted);line-height:1.35}.includeBox{accent-color:#7dd3fc}
+    .hidden{display:none!important}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.12);max-height:32vh}table{border-collapse:collapse;width:100%;min-width:760px}th,td{border-bottom:1px solid rgba(37,48,75,.75);padding:8px 10px;text-align:left;font-size:12.5px;vertical-align:middle}th{position:sticky;top:0;background:#131c31;color:#bfcbee;z-index:1}tr:last-child td{border-bottom:0}td input[type="text"]{width:100%;min-width:170px;background:#0c1324;border:1px solid #2c3857;border-radius:10px;color:var(--text);padding:7px 9px;outline:none}td input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(125,211,252,.12)}.nameInput.nameSelected{border-color:var(--accent2)!important;background:rgba(167,139,250,.12);box-shadow:inset 0 0 0 1px rgba(167,139,250,.35)}td .small{font-size:12px;color:var(--muted);line-height:1.35}.includeBox{accent-color:#7dd3fc}.copyHint{margin:8px 2px 0;color:var(--muted);font-size:12px;line-height:1.35}
 
     .platePanel{margin-top:16px;border-top:1px solid rgba(37,48,75,.72);padding-top:8px}.plateIntro{font-size:12.5px;color:var(--muted);line-height:1.4;margin:0 0 10px}.plateActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.btn.mini{font-size:12px;padding:8px 10px;border-radius:11px}.plateWrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.16);padding:8px;max-width:100%}.plateGrid{width:100%;min-width:860px;border-collapse:separate;border-spacing:3px;table-layout:fixed}.plateGrid th,.plateGrid td{position:static;border:0;padding:0;text-align:center;vertical-align:middle;font-size:11px}.plateGrid th{background:transparent;color:#9eaccd;font-weight:850;height:20px}.plateGrid .corner{width:24px}.plateGrid .rowHead{width:24px}.plateGrid td{height:34px;background:#0c1324;border:1px solid #2c3857;border-radius:8px;color:#e8f0ff;outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text;transition:.12s}.plateGrid td:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(125,211,252,.12);background:#101a31}.plateCurrent{margin-top:9px;color:#cbd7f3;font-size:12px;line-height:1.35;min-height:34px}.plateCurrent .muted{color:var(--muted)}
 
@@ -43,7 +43,7 @@
       <div class="titleBlock">
         <div class="tag"><span class="dot"></span> Browser-only Octet result processor</div>
         <h1>Process Octet Files</h1>
-        <p class="sub">Drop Octet-style result exports, rename detected fits, then export clean Prism-ready Excel workbooks without R, modules, folders, or command-line steps.</p>
+        <p class="sub">Drop Octet result exports, rename detected fits, then export clean Prism-ready Excel workbooks.</p>
       </div>
       <div class="privacy">Runs locally in your browser</div>
     </header>
@@ -51,7 +51,7 @@
     <div class="app">
       <aside class="card panel">
         <h2>Setup</h2>
-        <p>Choose the format of your BLI run first, then drag in all result files for that run.</p>
+        <p>Choose your BLI setup, then drag in all result files for that run.</p>
 
         <div class="label">Mode</div>
         <div class="modeGrid" id="modeGrid">
@@ -70,7 +70,7 @@
         <div id="status" class="status pillrow hidden"></div>
 
         <div id="loadedFiles" class="hidden">
-          <div class="label">Loaded files</div>
+          <div class="label">Loaded Files</div>
           <div class="fileList" id="fileList"></div>
         </div>
 
@@ -90,6 +90,7 @@
             <div class="buttonRow tight"><button type="button" class="btn secondary" id="clearNamesBtn">Clear all names</button></div>
           </div>
           <div class="tableWrap"><table id="renameTable"></table></div>
+          <div class="copyHint">Tip: paste a block from Excel into any name box to fill downward. Click one name box, Shift-click another, then Ctrl/Cmd+C to copy that range back out.</div>
           <div id="dilutionTools" class="dilutionTools hidden">
             <div class="dilutionGrid">
               <label>Series values
@@ -117,7 +118,7 @@
 
           <div id="plateReference" class="platePanel">
           <div class="label">96-well reference</div>
-          <p class="plateIntro">Paste an 8 × 12 block from Excel/Sheets, or click cells and type. This is a manual reference only; it does not control the export.</p>
+          <p class="plateIntro">Paste your Excel plate setup here.</p>
           <div class="plateActions">
             <button type="button" class="btn secondary mini" id="pastePlateBtn">Paste from clipboard</button>
             <button type="button" class="btn secondary mini" id="clearPlateBtn">Clear plate</button>
@@ -134,7 +135,7 @@
       </section>
     </div>
 
-    <div class="footer">Built for fast Prism handoff: clean data only, no metadata rows above the Time/Data/Fit table.</div>
+    <div class="footer">Built for fast Prism handoff.</div>
   </main>
 
 <script>
@@ -364,12 +365,12 @@
     els.exportPrimaryBtn.textContent = mode === 'dilution' ? 'Export dilution XLSX' : 'Export single-curve XLSX';
     els.renameTitle.textContent = mode === 'dilution' ? 'Rename dilution-series sheets' : 'Rename single binding curves';
     els.renameHelp.textContent = mode === 'dilution'
-      ? 'Each row represents one fit group across files. The custom name becomes the worksheet name; optional dilution labels become the curve column labels.'
-      : 'Each row represents one curve from one file. Custom names become the grouped column headers on a single worksheet.';
+      ? 'Each row represents one fit group across files. Paste a column or block from Excel into any name box to fill downward from that row.'
+      : 'Each row represents one curve from one file. Paste a column or block from Excel into any name box to fill downward from that row.';
     els.exportNote.textContent = mode === 'dilution'
       ? 'Dilution export: one XLSX workbook, one sheet per renamed fit group. Time is normalised to zero and fit columns are included.'
-      : 'Single-curve export: one XLSX workbook, one sheet containing all renamed curves. Time is normalised to zero and fit columns are included.';
-    renderFiles(); renderRenameTable(); renderPreview();
+      : 'Single-curve export: one XLSX workbook, one sheet containing all renamed curves with one shared Time column. Time is normalised to zero and fit columns are included.';
+    renderFiles(); renderRenameTable(); clearNameSelection(); renderPreview();
   }
 
   function renderFiles(){
@@ -644,18 +645,18 @@
 
   function buildSingleRows(curves, entryMap, opts){
     const maxRows = Math.max(...curves.map(c => c.block.rows.length), 0);
-    const header = [];
+    const header = ['Time'];
     for (const c of curves) {
       const name = entryMap.get(c.id).name;
-      header.push(`Time - ${name}`, `Data - ${name}`);
+      header.push(`Data - ${name}`);
       if (opts.includeFit) header.push(`Fit - ${name}`);
     }
     const rows = [header];
     for (let r=0; r<maxRows; r++) {
       const row = [];
+      row.push(timeValue(curves[0].block, r, opts));
       for (const c of curves) {
         const dataRow = c.block.rows[r];
-        row.push(timeValue(c.block, r, opts));
         row.push(dataRow ? val(dataRow.data) : '');
         if (opts.includeFit) row.push(dataRow ? val(dataRow.fit) : '');
       }
@@ -734,14 +735,90 @@
     const idx = inputs.indexOf(current);
     if (idx < 0) return;
     const next = inputs[idx + direction];
-    if (next) { next.focus(); next.select(); }
+    if (next) {
+      setNameSelection(idx + direction, idx + direction, idx + direction);
+      next.focus();
+      next.select();
+    }
+  }
+
+  function nameInputs(){
+    return Array.from(els.renameTable.querySelectorAll('.nameInput'));
+  }
+
+  function setNameSelection(anchor, start, end){
+    const inputs = nameInputs();
+    if (!inputs.length) {
+      state.nameSelection = { anchor: null, start: null, end: null };
+      return;
+    }
+    const clamp = (n) => Math.max(0, Math.min(inputs.length - 1, Number(n)));
+    anchor = clamp(anchor);
+    start = clamp(start);
+    end = clamp(end);
+    state.nameSelection = { anchor, start: Math.min(start, end), end: Math.max(start, end) };
+    paintNameSelection();
+  }
+
+  function clearNameSelection(){
+    state.nameSelection = { anchor: null, start: null, end: null };
+    paintNameSelection();
+  }
+
+  function paintNameSelection(){
+    const inputs = nameInputs();
+    const { start, end } = state.nameSelection || {};
+    inputs.forEach((input, i) => input.classList.toggle('nameSelected', start !== null && end !== null && i >= start && i <= end));
+  }
+
+  function selectedNameInputs(){
+    const inputs = nameInputs();
+    const { start, end } = state.nameSelection || {};
+    if (start === null || end === null) return [];
+    return inputs.slice(start, end + 1);
+  }
+
+  function copySelectedNamesToClipboard(event){
+    const active = document.activeElement;
+    if (!active || !active.classList || !active.classList.contains('nameInput')) return;
+    const selected = selectedNameInputs();
+    if (selected.length <= 1) return;
+    const text = selected.map(input => input.value || '').join('\n');
+    event.clipboardData.setData('text/plain', text);
+    event.preventDefault();
+  }
+
+  function flattenClipboardGridForNames(text){
+    const grid = parseGridText(text);
+    const values = [];
+    for (const row of grid) {
+      for (const cell of row) values.push(String(cell ?? '').trim());
+    }
+    return values;
+  }
+
+  function pasteNamesFromClipboardText(text, startInput){
+    const inputs = Array.from(els.renameTable.querySelectorAll('.nameInput'));
+    const startIdx = inputs.indexOf(startInput);
+    if (startIdx < 0) return;
+    const values = flattenClipboardGridForNames(text);
+    if (!values.length) return;
+    values.forEach((value, offset) => {
+      const input = inputs[startIdx + offset];
+      if (input) input.value = value;
+    });
+    const lastIdx = Math.min(inputs.length - 1, startIdx + values.length - 1);
+    setNameSelection(startIdx, startIdx, lastIdx);
+    if (inputs[lastIdx]) { inputs[lastIdx].focus(); inputs[lastIdx].select(); }
+    paintPreview();
   }
 
 
   function clearNames(){
-    const inputs = Array.from(els.renameTable.querySelectorAll('.nameInput'));
+    const inputs = nameInputs();
     inputs.forEach(input => input.value = '');
-    if (inputs[0]) inputs[0].focus();
+    if (inputs[0]) { setNameSelection(0, 0, 0); inputs[0].focus(); }
+    else clearNameSelection();
   }
 
 
@@ -838,16 +915,56 @@
     const text = e.clipboardData.getData('text/plain');
     fillPlateFromText(text, Number(cell.dataset.row), Number(cell.dataset.col));
   });
+  els.renameTable.addEventListener('paste', e => {
+    if (!e.target.classList.contains('nameInput')) return;
+    const text = e.clipboardData.getData('text/plain');
+    if (!text) return;
+    if (text.includes('\t') || text.includes('\n') || text.includes(',')) {
+      e.preventDefault();
+      pasteNamesFromClipboardText(text, e.target);
+    }
+  });
   els.renameTable.addEventListener('input', e => {
     if (e.target.classList.contains('nameInput')) paintPreview();
   });
   els.renameTable.addEventListener('focusin', e => {
-    if (e.target.classList.contains('nameInput')) e.target.select();
+    if (!e.target.classList.contains('nameInput')) return;
+    const inputs = nameInputs();
+    const idx = inputs.indexOf(e.target);
+    if (idx >= 0 && state.nameSelection.start === null) setNameSelection(idx, idx, idx);
+    e.target.select();
   });
+  els.renameTable.addEventListener('click', e => {
+    if (!e.target.classList.contains('nameInput')) return;
+    const inputs = nameInputs();
+    const idx = inputs.indexOf(e.target);
+    if (idx < 0) return;
+    if (e.shiftKey && state.nameSelection.anchor !== null) {
+      setNameSelection(state.nameSelection.anchor, state.nameSelection.anchor, idx);
+    } else {
+      setNameSelection(idx, idx, idx);
+    }
+  });
+  document.addEventListener('copy', copySelectedNamesToClipboard);
   els.renameTable.addEventListener('keydown', e => {
-    if (e.target.classList.contains('nameInput') && e.key === 'Enter') {
+    if (!e.target.classList.contains('nameInput')) return;
+    const inputs = nameInputs();
+    const idx = inputs.indexOf(e.target);
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      e.preventDefault();
+      if (inputs.length) setNameSelection(0, 0, inputs.length - 1);
+      return;
+    }
+    if (e.key === 'Enter') {
       e.preventDefault();
       focusNextNameInput(e.target, e.shiftKey ? -1 : 1);
+    }
+    if (e.shiftKey && (e.key === 'ArrowDown' || e.key === 'ArrowUp') && idx >= 0) {
+      e.preventDefault();
+      const nextIdx = Math.max(0, Math.min(inputs.length - 1, idx + (e.key === 'ArrowDown' ? 1 : -1)));
+      setNameSelection(state.nameSelection.anchor ?? idx, state.nameSelection.anchor ?? idx, nextIdx);
+      inputs[nextIdx].focus();
+      inputs[nextIdx].select();
     }
   });
   renderPlateGrid();
