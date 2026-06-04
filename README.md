@@ -1,6 +1,6 @@
 # Process Octet Files
 
-A standalone browser-based tool for converting Octet/BLI result exports into Prism-friendly Excel workbooks.
+A standalone browser-based tool for converting Octet/BLI result exports into Prism-friendly Excel workbooks and directly into .pzfx files.
 
 The app is designed for fast day-to-day processing of Octet-style `.txt`, `.csv`, and `.tsv` result files without needing R, command-line scripts, folder structures, or software installation.
 
