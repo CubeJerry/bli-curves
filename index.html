@@ -169,9 +169,24 @@
   }
   function makeCsv(rows){ return rows.map(row => row.map(csvEscape).join(',')).join('\r\n') + '\r\n'; }
   function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    a.href = url;
+    a.download = filename;
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+
+    // Some browsers, especially Safari/WebKit, may not start the download
+    // synchronously. Revoking the object URL too quickly can cancel larger
+    // generated files, which made the PZFX export button appear unresponsive.
+    requestAnimationFrame(() => {
+      a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    });
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      a.remove();
+    }, 60000);
   }
 
   function naturalCompare(a,b){ return String(a).localeCompare(String(b), undefined, {numeric:true, sensitivity:'base'}); }
