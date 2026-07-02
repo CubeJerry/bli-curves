@@ -2368,8 +2368,8 @@ ${tableXml}
     event.preventDefault();
   }
 
-  function flattenClipboardGridForNames(text){
-    const grid = parseGridText(text);
+  function flattenClipboardGridForNames(text, splitCommas=true){
+    const grid = splitCommas ? parseGridText(text) : String(text || '').replace(/\r/g,'').split('\n').filter((line, idx, arr) => line.length || idx < arr.length - 1).map(line => line.split('\t'));
     const values = [];
     for (const row of grid) {
       for (const cell of row) values.push(String(cell ?? '').trim());
@@ -2382,7 +2382,8 @@ ${tableXml}
     const inputs = Array.from(els.renameTable.querySelectorAll(selector));
     const startIdx = inputs.indexOf(startInput);
     if (startIdx < 0) return;
-    const values = flattenClipboardGridForNames(text);
+    const splitCommas = !startInput.classList.contains('antigenInput');
+    const values = flattenClipboardGridForNames(text, splitCommas);
     if (!values.length) return;
     values.forEach((value, offset) => {
       const input = inputs[startIdx + offset];
@@ -2501,7 +2502,10 @@ ${tableXml}
     if (!e.target.classList.contains('nameInput') && !e.target.classList.contains('antigenInput')) return;
     const text = e.clipboardData.getData('text/plain');
     if (!text) return;
-    if (text.includes('\t') || text.includes('\n') || text.includes(',')) {
+    const isAntigenInput = e.target.classList.contains('antigenInput');
+    const isRangePaste = text.includes('\t') || text.includes('\n');
+    const isCommaSeparatedNamePaste = !isAntigenInput && text.includes(',');
+    if (isRangePaste || isCommaSeparatedNamePaste) {
       e.preventDefault();
       pasteNamesFromClipboardText(text, e.target);
     }
