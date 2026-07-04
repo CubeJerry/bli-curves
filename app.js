@@ -477,9 +477,17 @@
   }
   function val(v){ return v === null || v === undefined ? '' : v; }
   function roundForOutput(n){ return Number.isFinite(n) ? Number(n.toFixed(10)) : ''; }
+  function maxCurveRows(curves){
+    let maxRows = 0;
+    for (const c of curves) {
+      const count = c?.block?.rows?.length || 0;
+      if (count > maxRows) maxRows = count;
+    }
+    return maxRows;
+  }
   function timesAlign(curves, opts){
     if (!curves.length) return false;
-    const maxRows = Math.max(...curves.map(c => c.block.rows.length));
+    const maxRows = maxCurveRows(curves);
     for (let r=0; r<maxRows; r++) {
       let first = null;
       for (const c of curves) {
@@ -517,7 +525,7 @@
 
   function buildDilutionRows(group, customName, opts){
     const curves = group.curves;
-    const maxRows = Math.max(...curves.map(c => c.block.rows.length), 0);
+    const maxRows = maxCurveRows(curves);
     const useShared = opts.sharedTime && timesAlign(curves, opts);
     const header = [];
     if (useShared) header.push('Time');
@@ -543,7 +551,7 @@
   }
 
   function buildSingleRows(curves, entryMap, opts){
-    const maxRows = Math.max(...curves.map(c => c.block.rows.length), 0);
+    const maxRows = maxCurveRows(curves);
     const header = ['Time'];
     for (const c of curves) {
       const name = entryMap.get(c.id).name;
@@ -1953,7 +1961,7 @@ ${values.map(prismD).join('\n')}
 </Subcolumn>`;
   }
   function xValuesForCurves(curves, opts){
-    const maxRows = Math.max(...curves.map(c => c.block.rows.length), 0);
+    const maxRows = maxCurveRows(curves);
     let values = [];
     for (let r=0; r<maxRows; r++) {
       let v = '';
@@ -2008,16 +2016,26 @@ ${yXml}
 <Constant><Name>Protocol</Name><Value></Value></Constant>
 </Info>`;
   }
-  function finiteNumbers(values){
-    return values.map(v => Number(v)).filter(Number.isFinite);
-  }
   function pzfxAxisSummary(table){
-    const xs = finiteNumbers(table.xValues);
-    const ys = table.yColumns.flatMap(col => finiteNumbers(col.values));
-    const minY = ys.length ? Math.min(...ys) : '';
-    const maxY = ys.length ? Math.max(...ys) : '';
-    const minX = xs.length ? Math.min(...xs) : '';
-    const maxX = xs.length ? Math.max(...xs) : '';
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const value of table.xValues) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) continue;
+      if (n < minX) minX = n;
+      if (n > maxX) maxX = n;
+    }
+    for (const col of table.yColumns) {
+      for (const value of col.values) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) continue;
+        if (n < minY) minY = n;
+        if (n > maxY) maxY = n;
+      }
+    }
+    minX = minX === Infinity ? '' : minX;
+    maxX = maxX === -Infinity ? '' : maxX;
+    minY = minY === Infinity ? '' : minY;
+    maxY = maxY === -Infinity ? '' : maxY;
     return {minX, maxX, minY, maxY};
   }
   function buildPzfx(tables){
@@ -2367,7 +2385,7 @@ ${tableXml}
         const parsed = parseResultFile(file.name, text);
         parsed.size = file.size;
         state.files.push(parsed);
-        state.warnings.push(...parsed.warnings);
+        for (const warning of parsed.warnings) state.warnings.push(warning);
       } catch (err) { state.warnings.push(`${file.name}: ${err.message || err}`); }
     }
     render();
@@ -2425,7 +2443,8 @@ ${tableXml}
     }
     const centralOffset = offset; const centralBytes = concatUint8(central); const end=[];
     writeU32(end,0x06054b50); writeU16(end,0); writeU16(end,0); writeU16(end,files.length); writeU16(end,files.length); writeU32(end,centralBytes.length); writeU32(end,centralOffset); writeU16(end,0);
-    return concatUint8([...parts, centralBytes, new Uint8Array(end)]);
+    parts.push(centralBytes, new Uint8Array(end));
+    return concatUint8(parts);
   }
 
   function runExport(fn, label){
