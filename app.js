@@ -3,7 +3,7 @@
 
   const DEFAULT_OPTIONS = { normaliseTime: true, includeFit: true, skipNoData: true, sharedTime: true };
   const $ = (id) => document.getElementById(id);
-  const state = { files: [], warnings: [], previewGroup: '' };
+  const state = { files: [], warnings: [], previewGroup: '', downloadUrls: [] };
 
   const els = {
     drop: $('drop'), pickBtn: $('pickBtn'), clearBtn: $('clearBtn'), fileInput: $('fileInput'),
@@ -26,8 +26,27 @@
     return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
   function makeCsv(rows){ return rows.map(row => row.map(csvEscape).join(',')).join('\r\n') + '\r\n'; }
+  function clearDownloadUrls(){
+    for (const url of state.downloadUrls) URL.revokeObjectURL(url);
+    state.downloadUrls = [];
+  }
+  function setDownloadStatus(message, url='', filename=''){
+    let status = document.getElementById('downloadStatus');
+    if (!status) {
+      status = document.createElement('div');
+      status.id = 'downloadStatus';
+      status.className = 'downloadStatus';
+      els.exportNote.insertAdjacentElement('afterend', status);
+    }
+    const link = url
+      ? ` <a href="${url}" download="${escapeHtml(filename)}" rel="noopener">Click here if it did not start.</a>`
+      : '';
+    status.innerHTML = `${escapeHtml(message)}${link}`;
+  }
   function downloadBlob(blob, filename){
+    clearDownloadUrls();
     const url = URL.createObjectURL(blob);
+    state.downloadUrls.push(url);
     const a = document.createElement('a');
     a.href = url;
     a.download = filename;
@@ -37,9 +56,16 @@
 
     a.click();
     setTimeout(() => {
-      URL.revokeObjectURL(url);
       a.remove();
-    }, 60000);
+    }, 0);
+    setDownloadStatus(`Download started for ${filename}.`, url, filename);
+    setTimeout(() => {
+      const idx = state.downloadUrls.indexOf(url);
+      if (idx >= 0) {
+        URL.revokeObjectURL(url);
+        state.downloadUrls.splice(idx, 1);
+      }
+    }, 5 * 60 * 1000);
   }
 
   function naturalCompare(a,b){ return String(a).localeCompare(String(b), undefined, {numeric:true, sensitivity:'base'}); }
@@ -2402,6 +2428,17 @@ ${tableXml}
     return concatUint8([...parts, centralBytes, new Uint8Array(end)]);
   }
 
+  function runExport(fn, label){
+    try {
+      fn();
+    } catch (err) {
+      const message = err?.message || String(err);
+      setDownloadStatus(`${label} failed: ${message}`);
+      alert(`${label} failed: ${message}`);
+      throw err;
+    }
+  }
+
   els.pickBtn.addEventListener('click', () => els.fileInput.click());
   els.fileInput.addEventListener('change', e => loadFiles(e.target.files));
   els.clearBtn.addEventListener('click', () => { state.files=[]; state.warnings=[]; els.fileInput.value=''; render(); });
@@ -2409,8 +2446,8 @@ ${tableXml}
   els.drop.addEventListener('dragleave', () => els.drop.classList.remove('drag'));
   els.drop.addEventListener('drop', e => { e.preventDefault(); els.drop.classList.remove('drag'); loadFiles(e.dataTransfer.files); });
   document.querySelectorAll('input[name="mode"]').forEach(el => el.addEventListener('change', render));
-  els.exportPrimaryBtn.addEventListener('click', () => getMode() === 'dilution' ? exportDilutionXlsx() : exportSingleXlsx());
-  els.exportPzfxBtn.addEventListener('click', () => getMode() === 'dilution' ? exportDilutionPzfx() : exportSinglePzfx());
+  els.exportPrimaryBtn.addEventListener('click', () => runExport(() => getMode() === 'dilution' ? exportDilutionXlsx() : exportSingleXlsx(), 'XLSX export'));
+  els.exportPzfxBtn.addEventListener('click', () => runExport(() => getMode() === 'dilution' ? exportDilutionPzfx() : exportSinglePzfx(), 'PZFX export'));
   els.clearNamesBtn.addEventListener('click', () => { clearNames(); paintPreview(); });
   if (els.previewSelect) els.previewSelect.addEventListener('change', e => { state.previewGroup = e.target.value; paintPreview(); });
   if (els.dilutionValuesInput) els.dilutionValuesInput.addEventListener('input', paintPreview);
