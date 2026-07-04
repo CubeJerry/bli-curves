@@ -27,7 +27,7 @@
     .pillrow{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.035);color:#cbd7f3;font-size:12px}.pill.good{border-color:rgba(52,211,153,.42);color:#b8f7d8}.pill.bad{border-color:rgba(251,113,133,.45);color:#fecdd3}.status{margin-top:14px}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--line);background:rgba(255,255,255,.05);padding:2px 6px;border-radius:6px;color:#d9e5ff}
     .fileList{display:grid;gap:9px;margin-top:10px}.fileCard{padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}.fileCard b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fileCard .meta{margin-top:5px;color:var(--muted);font-size:12px;line-height:1.42}.fileCard .meta strong{color:#d7e1fb;font-weight:700}
     .mainPanel{min-height:636px}.sectionHead{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}.sectionHead h2{margin:0;font-size:22px}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:14px}.empty{min-height:420px;display:grid;place-items:center;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:20px;background:rgba(255,255,255,.018);padding:24px}.empty b{display:block;color:#e9efff;font-size:20px;margin-bottom:8px}
-    .hidden{display:none!important}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.12);max-height:32vh}table{border-collapse:collapse;width:100%;min-width:760px}th,td{border-bottom:1px solid rgba(37,48,75,.75);padding:8px 10px;text-align:left;font-size:12.5px;vertical-align:middle}th{position:sticky;top:0;background:#131c31;color:#bfcbee;z-index:1}tr:last-child td{border-bottom:0}td input[type="text"]{width:100%;min-width:170px;background:#0c1324;border:1px solid #2c3857;border-radius:10px;color:var(--text);padding:7px 9px;outline:none}td input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(125,211,252,.12)}.nameInput.nameSelected{border-color:var(--accent2)!important;background:rgba(167,139,250,.12);box-shadow:inset 0 0 0 1px rgba(167,139,250,.35)}td .small{font-size:12px;color:var(--muted);line-height:1.35}.includeBox{accent-color:#7dd3fc}.copyHint{margin:8px 2px 0;color:var(--muted);font-size:12px;line-height:1.35}
+    .hidden{display:none!important}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.12);max-height:32vh}table{border-collapse:collapse;width:100%;min-width:760px}th,td{border-bottom:1px solid rgba(37,48,75,.75);padding:8px 10px;text-align:left;font-size:12.5px;vertical-align:middle}th{position:sticky;top:0;background:#131c31;color:#bfcbee;z-index:1}tr:last-child td{border-bottom:0}td input[type="text"]{width:100%;min-width:170px;background:#0c1324;border:1px solid #2c3857;border-radius:10px;color:var(--text);padding:7px 9px;outline:none}td input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(125,211,252,.12)}.nameInput.nameSelected,.antigenInput.nameSelected{border-color:var(--accent2)!important;background:rgba(167,139,250,.12);box-shadow:inset 0 0 0 1px rgba(167,139,250,.35)}td .small{font-size:12px;color:var(--muted);line-height:1.35}.includeBox{accent-color:#7dd3fc}.copyHint{margin:8px 2px 0;color:var(--muted);font-size:12px;line-height:1.35}
 
     .platePanel{margin-top:16px;border-top:1px solid rgba(37,48,75,.72);padding-top:8px}.plateIntro{font-size:12.5px;color:var(--muted);line-height:1.4;margin:0 0 10px}.plateActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.btn.mini{font-size:12px;padding:8px 10px;border-radius:11px}.plateWrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.16);padding:8px;max-width:100%}.plateGrid{width:100%;min-width:860px;border-collapse:separate;border-spacing:3px;table-layout:fixed}.plateGrid th,.plateGrid td{position:static;border:0;padding:0;text-align:center;vertical-align:middle;font-size:11px}.plateGrid th{background:transparent;color:#9eaccd;font-weight:850;height:20px}.plateGrid .corner{width:24px}.plateGrid .rowHead{width:24px}.plateGrid td{height:34px;background:#0c1324;border:1px solid #2c3857;border-radius:8px;color:#e8f0ff;outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text;transition:.12s}.plateGrid td:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(125,211,252,.12);background:#101a31}.plateCurrent{margin-top:9px;color:#cbd7f3;font-size:12px;line-height:1.35;min-height:34px}.plateCurrent .muted{color:var(--muted)}
 
@@ -90,7 +90,7 @@
             <div class="buttonRow tight"><button type="button" class="btn secondary" id="clearNamesBtn">Clear all names</button></div>
           </div>
           <div class="tableWrap"><table id="renameTable"></table></div>
-          <div class="copyHint">Tip: paste a block from Excel into any name box to fill downward. Click one name box, Shift-click another, then Ctrl/Cmd+C to copy that range back out.</div>
+          <div class="copyHint">Tip: paste a block from Excel into any name or antigen box to fill downward. Click one box, Shift-click another, then Ctrl/Cmd+C to copy that range back out.</div>
           <div id="dilutionTools" class="dilutionTools hidden">
             <div class="dilutionGrid">
               <label>Series values
@@ -358,7 +358,8 @@
     return rows.map(tr => ({
       id: tr.dataset.id,
       include: true,
-      name: tr.querySelector('.nameInput').value.trim() || tr.querySelector('.nameInput').dataset.fallback || 'Curve'
+      name: tr.querySelector('.nameInput').value.trim() || tr.querySelector('.nameInput').dataset.fallback || 'Curve',
+      antigens: Array.from(tr.querySelectorAll('.antigenInput')).map(input => input.value.trim() || input.dataset.fallback || 'Unspecified antigen')
     }));
   }
 
@@ -383,11 +384,11 @@
     els.exportPzfxBtn.textContent = mode === 'dilution' ? 'Export dilution PZFX' : 'Export single-curve PZFX';
     els.renameTitle.textContent = mode === 'dilution' ? 'Rename dilution-series sheets' : 'Rename single binding curves';
     els.renameHelp.textContent = mode === 'dilution'
-      ? 'Each row represents one fit group across files. Paste a column or block from Excel into any name box to fill downward from that row.'
-      : 'Each row represents one curve from one file. Paste a column or block from Excel into any name box to fill downward from that row.';
+      ? 'Each row represents one fit group across files. Enter or paste antigen names in the antigen boxes; exports split selected data into separate sheets/tables by antigen.'
+      : 'Each row represents one curve from one file. Enter or paste antigen names in the antigen boxes; exports split selected data into separate sheets/tables by antigen.';
     els.exportNote.textContent = mode === 'dilution'
-      ? 'Dilution export: XLSX workbook or clean Prism PZFX. Time starts at 0; each included fit group is exported as its own XY table for one graph; data and fit columns are included.'
-      : 'Single-curve export: XLSX workbook or clean Prism PZFX. Time starts at 0; all selected curves are exported into one XY table so they plot together on one graph.';
+      ? 'Dilution export: XLSX workbook or clean Prism PZFX. Time starts at 0; selected fit groups are split into separate sheets/tables by antigen; data and fit columns are included.'
+      : 'Single-curve export: XLSX workbook or clean Prism PZFX. Time starts at 0; selected curves are split into separate sheets/tables by antigen.';
     renderFiles(); renderRenameTable(); clearNameSelection(); renderPreview();
   }
 
@@ -405,16 +406,16 @@
     if (!state.files.length) { els.renameTable.innerHTML=''; return; }
     if (mode === 'dilution') {
       const groups = dilutionGroups();
-      els.renameTable.innerHTML = `<thead><tr><th>Detected fit</th><th>Custom sheet/column name</th><th>Rows</th></tr></thead><tbody>` + groups.map(g => {
-        const rows = g.curves.map(c => c.block.rowCount).join(', ');
-        return `<tr data-id="${escapeHtml(g.key)}"><td><b>${escapeHtml(g.key)}</b><div class="small">${g.curves.length} curve${g.curves.length===1?'':'s'}</div></td><td><input class="nameInput" type="text" value="" data-fallback="${escapeHtml(g.key)}" placeholder="Enter name, e.g. 3117"></td><td><div class="small">${escapeHtml(rows)}</div></td></tr>`;
+      els.renameTable.innerHTML = `<thead><tr><th>Detected fit</th><th>Custom sheet/column name</th><th>Antigens</th></tr></thead><tbody>` + groups.map(g => {
+        const antigenInputs = g.curves.map(c => `<input class="antigenInput" type="text" value="" data-curve-id="${escapeHtml(c.id)}" data-fallback="Unspecified antigen" placeholder="${escapeHtml(sourceLabel(c.file))} antigen" title="${escapeHtml(sourceLabel(c.file))}: ${c.block.rowCount} rows">`).join('<div style="height:6px"></div>');
+        return `<tr data-id="${escapeHtml(g.key)}"><td><b>${escapeHtml(g.key)}</b><div class="small">${g.curves.length} curve${g.curves.length===1?'':'s'}</div></td><td><input class="nameInput" type="text" value="" data-fallback="${escapeHtml(g.key)}" placeholder="Enter name, e.g. 3117"></td><td>${antigenInputs}</td></tr>`;
       }).join('') + `</tbody>`;
     } else {
       const curves = singleCurves();
-      els.renameTable.innerHTML = `<thead><tr><th>Source</th><th>Detected fit</th><th>Custom curve name</th><th>Rows</th></tr></thead><tbody>` + curves.map(c => {
+      els.renameTable.innerHTML = `<thead><tr><th>Source</th><th>Detected fit</th><th>Custom curve name</th><th>Antigen</th></tr></thead><tbody>` + curves.map(c => {
         const id = c.id;
         const fallback = `${sourceLabel(c.file)} ${c.block.fitName}`;
-        return `<tr data-id="${escapeHtml(id)}"><td><b>${escapeHtml(sourceLabel(c.file))}</b><div class="small">${escapeHtml(c.file.name)}</div></td><td>${escapeHtml(c.block.fitName)}</td><td><input class="nameInput" type="text" value="" data-fallback="${escapeHtml(fallback)}" placeholder="Enter curve name"></td><td><div class="small">${c.block.rowCount} rows</div></td></tr>`;
+        return `<tr data-id="${escapeHtml(id)}"><td><b>${escapeHtml(sourceLabel(c.file))}</b><div class="small">${escapeHtml(c.file.name)}</div></td><td>${escapeHtml(c.block.fitName)}</td><td><input class="nameInput" type="text" value="" data-fallback="${escapeHtml(fallback)}" placeholder="Enter curve name"></td><td><input class="antigenInput" type="text" value="" data-curve-id="${escapeHtml(id)}" data-fallback="Unspecified antigen" placeholder="Enter antigen" title="${c.block.rowCount} rows"></td></tr>`;
       }).join('') + `</tbody>`;
     }
   }
@@ -2169,6 +2170,24 @@ ${tableXml}
     const xml = buildPzfx(tables);
     downloadBlob(new Blob([xml], {type:'application/xml'}), filename);
   }
+
+  function antigenName(value){
+    const name = String(value || '').trim();
+    return name || 'Unspecified antigen';
+  }
+  function groupByAntigen(items, getAntigen){
+    const groups = new Map();
+    for (const item of items) {
+      const antigen = antigenName(getAntigen(item));
+      if (!groups.has(antigen)) groups.set(antigen, []);
+      groups.get(antigen).push(item);
+    }
+    return Array.from(groups.entries()).map(([antigen, items]) => ({antigen, items}));
+  }
+  function dilutionCurvesForAntigen(group, entry, antigen){
+    return group.curves.filter((curve, index) => antigenName(entry.antigens[index]) === antigen);
+  }
+
   function exportDilutionPzfx(){
     const opts = getOptions();
     const entries = getRenameEntries();
@@ -2176,16 +2195,20 @@ ${tableXml}
     const tables = [];
     for (const group of dilutionGroups()) {
       const entry = entryMap.get(group.key); if (!entry || !entry.include) continue;
-      const curves = group.curves;
-      const xValues = xValuesForCurves(curves, opts);
-      const maxRows = xValues.length;
-      const yColumns = [];
-      for (const c of curves) {
-        const label = dilutionLabelForCurve(c) || sourceLabel(c.file);
-        yColumns.push({title:`Data - ${label}`, values:yValuesForCurve(c, 'data', maxRows)});
-        if (opts.includeFit) yColumns.push({title:`Fit - ${label}`, values:yValuesForCurve(c, 'fit', maxRows)});
+      const antigens = Array.from(new Set(entry.antigens.map(antigenName)));
+      for (const antigen of antigens) {
+        const curves = dilutionCurvesForAntigen(group, entry, antigen);
+        if (!curves.length) continue;
+        const xValues = xValuesForCurves(curves, opts);
+        const maxRows = xValues.length;
+        const yColumns = [];
+        for (const c of curves) {
+          const label = dilutionLabelForCurve(c) || sourceLabel(c.file);
+          yColumns.push({title:`Data - ${label}`, values:yValuesForCurve(c, 'data', maxRows)});
+          if (opts.includeFit) yColumns.push({title:`Fit - ${label}`, values:yValuesForCurve(c, 'fit', maxRows)});
+        }
+        tables.push({id:prismTableId(tables.length, 'dilution'), title:`${antigen} - ${entry.name}`, xTitle:'Time', xValues, yColumns});
       }
-      tables.push({id:prismTableId(tables.length, 'dilution'), title:entry.name, xTitle:'Time', xValues, yColumns});
     }
     if (!tables.length) return alert('No fit groups selected for PZFX export.');
     downloadPzfx(tables, 'bli_dilution_series.pzfx');
@@ -2197,25 +2220,19 @@ ${tableXml}
     const curves = singleCurves().filter(c => entryMap.get(c.id)?.include);
     if (!curves.length) return alert('No curves selected for PZFX export.');
 
-    // Single-binding mode is intentionally different from dilution mode:
-    // all selected curves belong on the same graph, so export one Prism XY
-    // table with one shared Time column and one/two Y columns per curve.
-    const xValues = xValuesForCurves(curves, opts);
-    const maxRows = xValues.length;
-    const yColumns = [];
-    for (const c of curves) {
-      const entry = entryMap.get(c.id);
-      const name = entry?.name || c.name || sourceLabel(c.file);
-      yColumns.push({title:`Data - ${name}`, values:yValuesForCurve(c, 'data', maxRows)});
-      if (opts.includeFit) yColumns.push({title:`Fit - ${name}`, values:yValuesForCurve(c, 'fit', maxRows)});
+    const tables = [];
+    for (const {antigen, items} of groupByAntigen(curves, c => entryMap.get(c.id)?.antigens[0])) {
+      const xValues = xValuesForCurves(items, opts);
+      const maxRows = xValues.length;
+      const yColumns = [];
+      for (const c of items) {
+        const entry = entryMap.get(c.id);
+        const name = entry?.name || c.name || sourceLabel(c.file);
+        yColumns.push({title:`Data - ${name}`, values:yValuesForCurve(c, 'data', maxRows)});
+        if (opts.includeFit) yColumns.push({title:`Fit - ${name}`, values:yValuesForCurve(c, 'fit', maxRows)});
+      }
+      tables.push({id:prismTableId(tables.length, 'single'), title:antigen, xTitle:'Time', xValues, yColumns});
     }
-    const tables = [{
-      id:prismTableId(0, 'single'),
-      title:'Single binding curves',
-      xTitle:'Time',
-      xValues,
-      yColumns
-    }];
     downloadPzfx(tables, 'bli_single_binding_curves.pzfx');
   }
 
@@ -2227,8 +2244,13 @@ ${tableXml}
     const sheets = [];
     for (const group of dilutionGroups()) {
       const entry = entryMap.get(group.key); if (!entry || !entry.include) continue;
-      const rows = buildDilutionRows(group, entry.name, opts);
-      sheets.push({name: cleanSheetName(entry.name, used), rows});
+      const antigens = Array.from(new Set(entry.antigens.map(antigenName)));
+      for (const antigen of antigens) {
+        const curves = dilutionCurvesForAntigen(group, entry, antigen);
+        if (!curves.length) continue;
+        const rows = buildDilutionRows({...group, curves}, entry.name, opts);
+        sheets.push({name: cleanSheetName(`${antigen} - ${entry.name}`, used), rows});
+      }
     }
     if (!sheets.length) return alert('No fit groups selected for export.');
     const blob = buildXlsx(sheets);
@@ -2240,8 +2262,12 @@ ${tableXml}
     const entryMap = new Map(entries.map(e=>[e.id,e]));
     const curves = singleCurves().filter(c => entryMap.get(c.id)?.include);
     if (!curves.length) return alert('No curves selected for export.');
-    const rows = buildSingleRows(curves, entryMap, opts);
-    const blob = buildXlsx([{name:'Single binding curves', rows}]);
+    const used = new Set();
+    const sheets = groupByAntigen(curves, c => entryMap.get(c.id)?.antigens[0]).map(({antigen, items}) => ({
+      name: cleanSheetName(antigen, used),
+      rows: buildSingleRows(items, entryMap, opts)
+    }));
+    const blob = buildXlsx(sheets);
     downloadBlob(blob, 'bli_single_binding_curves.xlsx');
   }
 
@@ -2297,7 +2323,7 @@ ${tableXml}
   }
 
   function nameInputs(){
-    return Array.from(els.renameTable.querySelectorAll('.nameInput'));
+    return Array.from(els.renameTable.querySelectorAll('.nameInput, .antigenInput'));
   }
 
   function setNameSelection(anchor, start, end){
@@ -2334,7 +2360,7 @@ ${tableXml}
 
   function copySelectedNamesToClipboard(event){
     const active = document.activeElement;
-    if (!active || !active.classList || !active.classList.contains('nameInput')) return;
+    if (!active || !active.classList || (!active.classList.contains('nameInput') && !active.classList.contains('antigenInput'))) return;
     const selected = selectedNameInputs();
     if (selected.length <= 1) return;
     const text = selected.map(input => input.value || '').join('\n');
@@ -2342,8 +2368,8 @@ ${tableXml}
     event.preventDefault();
   }
 
-  function flattenClipboardGridForNames(text){
-    const grid = parseGridText(text);
+  function flattenClipboardGridForNames(text, splitCommas=true){
+    const grid = splitCommas ? parseGridText(text) : String(text || '').replace(/\r/g,'').split('\n').filter((line, idx, arr) => line.length || idx < arr.length - 1).map(line => line.split('\t'));
     const values = [];
     for (const row of grid) {
       for (const cell of row) values.push(String(cell ?? '').trim());
@@ -2352,10 +2378,12 @@ ${tableXml}
   }
 
   function pasteNamesFromClipboardText(text, startInput){
-    const inputs = Array.from(els.renameTable.querySelectorAll('.nameInput'));
+    const selector = startInput.classList.contains('antigenInput') ? '.antigenInput' : '.nameInput';
+    const inputs = Array.from(els.renameTable.querySelectorAll(selector));
     const startIdx = inputs.indexOf(startInput);
     if (startIdx < 0) return;
-    const values = flattenClipboardGridForNames(text);
+    const splitCommas = !startInput.classList.contains('antigenInput');
+    const values = flattenClipboardGridForNames(text, splitCommas);
     if (!values.length) return;
     values.forEach((value, offset) => {
       const input = inputs[startIdx + offset];
@@ -2471,10 +2499,13 @@ ${tableXml}
     fillPlateFromText(text, Number(cell.dataset.row), Number(cell.dataset.col));
   });
   els.renameTable.addEventListener('paste', e => {
-    if (!e.target.classList.contains('nameInput')) return;
+    if (!e.target.classList.contains('nameInput') && !e.target.classList.contains('antigenInput')) return;
     const text = e.clipboardData.getData('text/plain');
     if (!text) return;
-    if (text.includes('\t') || text.includes('\n') || text.includes(',')) {
+    const isAntigenInput = e.target.classList.contains('antigenInput');
+    const isRangePaste = text.includes('\t') || text.includes('\n');
+    const isCommaSeparatedNamePaste = !isAntigenInput && text.includes(',');
+    if (isRangePaste || isCommaSeparatedNamePaste) {
       e.preventDefault();
       pasteNamesFromClipboardText(text, e.target);
     }
@@ -2483,14 +2514,14 @@ ${tableXml}
     if (e.target.classList.contains('nameInput')) paintPreview();
   });
   els.renameTable.addEventListener('focusin', e => {
-    if (!e.target.classList.contains('nameInput')) return;
+    if (!e.target.classList.contains('nameInput') && !e.target.classList.contains('antigenInput')) return;
     const inputs = nameInputs();
     const idx = inputs.indexOf(e.target);
     if (idx >= 0 && state.nameSelection.start === null) setNameSelection(idx, idx, idx);
     e.target.select();
   });
   els.renameTable.addEventListener('click', e => {
-    if (!e.target.classList.contains('nameInput')) return;
+    if (!e.target.classList.contains('nameInput') && !e.target.classList.contains('antigenInput')) return;
     const inputs = nameInputs();
     const idx = inputs.indexOf(e.target);
     if (idx < 0) return;
@@ -2502,7 +2533,7 @@ ${tableXml}
   });
   document.addEventListener('copy', copySelectedNamesToClipboard);
   els.renameTable.addEventListener('keydown', e => {
-    if (!e.target.classList.contains('nameInput')) return;
+    if (!e.target.classList.contains('nameInput') && !e.target.classList.contains('antigenInput')) return;
     const inputs = nameInputs();
     const idx = inputs.indexOf(e.target);
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
