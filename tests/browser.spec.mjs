@@ -141,7 +141,10 @@ test("demo loads without runtime errors, single mode hides fits, and edits survi
   expect(errors).toEqual([]);
   const screenshot = testInfo.outputPath("desktop-workspace.png");
   await page.screenshot({ path: screenshot, fullPage: true });
-  await testInfo.attach("Desktop workspace", { path: screenshot, contentType: "image/png" });
+  await testInfo.attach("Desktop workspace", {
+    path: screenshot,
+    contentType: "image/png",
+  });
 });
 
 test("adding files preserves edits, skips exact duplicates and retains distinct same-name files", async ({
@@ -166,13 +169,11 @@ test("adding files preserves edits, skips exact duplicates and retains distinct 
     "2 different files have this name",
   );
   await expect(names(page).first()).toHaveValue("Keep this label");
-  await page
-    .locator("#fileInput")
-    .setInputFiles({
-      name: "unsupported.frd",
-      mimeType: "text/plain",
-      buffer: Buffer.from("raw acquisition"),
-    });
+  await page.locator("#fileInput").setInputFiles({
+    name: "unsupported.frd",
+    mimeType: "text/plain",
+    buffer: Buffer.from("raw acquisition"),
+  });
   await expect(page.locator("#message")).toContainText(
     "choose a TXT, CSV or TSV",
   );
@@ -277,13 +278,11 @@ test("project save and reopen restore source data, names, selection, mode, figur
   expect(JSON.parse(saved.buffer.toString()).files).toHaveLength(3);
   await page.locator("#clearBtn").click();
   await expect(page.locator("#emptyState")).toBeVisible();
-  await page
-    .locator("#projectInput")
-    .setInputFiles({
-      name: saved.name,
-      mimeType: "application/json",
-      buffer: saved.buffer,
-    });
+  await page.locator("#projectInput").setInputFiles({
+    name: saved.name,
+    mimeType: "application/json",
+    buffer: saved.buffer,
+  });
   await expect(page.locator("#message")).toContainText(`Opened ${saved.name}`);
   await expect(page.locator("#curveCount")).toHaveText("5 / 6 included");
   await expect(
@@ -311,13 +310,11 @@ test("invalid project input preserves the existing workspace", async ({
 }) => {
   await loadDemo(page);
   await names(page).first().fill("Keep this work");
-  await page
-    .locator("#projectInput")
-    .setInputFiles({
-      name: "invalid.json",
-      mimeType: "application/json",
-      buffer: Buffer.from('{"format":"another-app"}'),
-    });
+  await page.locator("#projectInput").setInputFiles({
+    name: "invalid.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('{"format":"another-app"}'),
+  });
   await expect(page.locator("#message")).toContainText(
     "Could not open project",
   );
@@ -443,7 +440,10 @@ test("mobile layout contains overflow in scrollable tables and keeps figure acti
   await expect(page.locator("#svgBtn")).toBeEnabled();
   const screenshot = testInfo.outputPath("mobile-workspace.png");
   await page.screenshot({ path: screenshot, fullPage: true });
-  await testInfo.attach("Mobile workspace", { path: screenshot, contentType: "image/png" });
+  await testInfo.attach("Mobile workspace", {
+    path: screenshot,
+    contentType: "image/png",
+  });
   await page.setViewportSize({ width: 320, height: 640 });
   expect(
     await page.evaluate(
@@ -452,13 +452,79 @@ test("mobile layout contains overflow in scrollable tables and keeps figure acti
   ).toBe(true);
 });
 
-test("opening index.html directly works offline without a development server", async ({ page }) => {
+test("opening index.html directly works offline without a development server", async ({
+  page,
+}) => {
   const externalRequests = [];
-  page.on("request", request => { if (/^https?:/.test(request.url())) externalRequests.push(request.url()); });
+  page.on("request", (request) => {
+    if (/^https?:/.test(request.url())) externalRequests.push(request.url());
+  });
   await page.goto(new URL("../index.html", import.meta.url).href);
   await loadDemo(page);
   await expect(page.locator("#plot .trace.data")).toHaveCount(6);
   const pzfx = await downloadFrom(page, "#pzfxBtn");
-  expect((await inspectXml(page, pzfx.buffer.toString())).tables[0].columns).toHaveLength(6);
+  expect(
+    (await inspectXml(page, pzfx.buffer.toString())).tables[0].columns,
+  ).toHaveLength(6);
   expect(externalRequests).toEqual([]);
+});
+
+test("UTF-16 import preserves source time when normalization is disabled", async ({
+  page,
+}) => {
+  const text = "Time1\tData1\r\n10\t0\r\n11\t0.5\r\n12\t1\r\n";
+  await page
+    .locator("#fileInput")
+    .setInputFiles({
+      name: "UTF16_A1.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.concat([
+        Buffer.from([255, 254]),
+        Buffer.from(text, "utf16le"),
+      ]),
+    });
+  await expect(page.locator("#curveCount")).toHaveText("1 / 1 included");
+  await page.locator("#normaliseTime").uncheck();
+  const pzfx = await downloadFrom(page, "#pzfxBtn");
+  const times = await page.evaluate(
+    (text) =>
+      [
+        ...new DOMParser()
+          .parseFromString(text, "application/xml")
+          .querySelectorAll("XColumn d"),
+      ].map((d) => d.textContent),
+    pzfx.buffer.toString(),
+  );
+  expect(times).toEqual(["10", "11", "12"]);
+});
+
+test("dilution concentration labels follow the selected plate axis", async ({
+  page,
+}) => {
+  await page
+    .locator("#fileInput")
+    .setInputFiles([
+      resultFile("Test_A1.txt"),
+      resultFile("Test_A2.txt"),
+      resultFile("Test_B1.txt"),
+      resultFile("Unassigned.txt"),
+    ]);
+  await expect(page.locator("#curveCount")).toHaveText("4 / 4 included");
+  await page.locator('input[name="mode"][value="dilution"]').check();
+  await page.locator("#dilutionTools summary").click();
+  await page.locator("#concentrationValues").fill("200, 100");
+  await page.locator("#applyConcentrationBtn").click();
+  expect(
+    await page
+      .locator('#curveTable [data-field="concentration"]')
+      .evaluateAll((inputs) => inputs.map((input) => input.value)),
+  ).toEqual(["200 nM", "200 nM", "100 nM", ""]);
+  await page.locator("#concentrationDirection").selectOption("column");
+  await page.locator("#concentrationValues").fill("40, 20");
+  await page.locator("#applyConcentrationBtn").click();
+  expect(
+    await page
+      .locator('#curveTable [data-field="concentration"]')
+      .evaluateAll((inputs) => inputs.map((input) => input.value)),
+  ).toEqual(["40 nM", "20 nM", "40 nM", ""]);
 });
