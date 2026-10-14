@@ -33,6 +33,19 @@ test("standalone accessible SVG has white background and fits opt in", () => {
   );
 });
 
+test("imported fits use round dots scaled to line width, while data stays solid", () => {
+  for (const lineWidth of [1, 2, 4]) {
+    const svg = renderSvg(example, { showFit: true, lineWidth });
+    const fit = svg.match(/<path class="trace imported-fit"[^>]+>/)[0];
+    const data = svg.match(/<path class="trace data"[^>]+>/)[0];
+    assert.ok(fit.includes(`stroke-dasharray="0 ${lineWidth * 3}"`));
+    assert.match(fit, /stroke-linecap="round"/);
+    assert.doesNotMatch(data, /stroke-dasharray/);
+    assert.match(svg, /Dotted: imported fit/);
+    assert.match(svg, /dotted lines show imported fits/);
+  }
+});
+
 test("gaps break traces, preserve point order, and render isolated observations", () => {
   const svg = renderSvg([
     {

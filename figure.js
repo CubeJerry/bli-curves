@@ -300,7 +300,7 @@
     const title = options.title || "BLI sensorgrams";
     const [xMinLabel, xMaxLabel] = distinctLabels([xMin, xMax]);
     const [yMinLabel, yMaxLabel] = distinctLabels([yMin, yMax]);
-    const description = `${series.length} selected curve${series.length === 1 ? "" : "s"}. ${options.xLabel || "X"} from ${xMinLabel} to ${xMaxLabel}; ${options.yLabel || "Y"} from ${yMinLabel} to ${yMaxLabel}. ${hasFits ? "Solid lines show imported data; dashed lines show imported fits. " : ""}Missing values break the traces. No smoothing or interpolation is applied.`;
+    const description = `${series.length} selected curve${series.length === 1 ? "" : "s"}. ${options.xLabel || "X"} from ${xMinLabel} to ${xMaxLabel}; ${options.yLabel || "Y"} from ${yMinLabel} to ${yMaxLabel}. ${hasFits ? "Solid lines show imported data; dotted lines show imported fits. " : ""}Missing values break the traces. No smoothing or interpolation is applied.`;
     const svg = [
       `<svg xmlns="http://www.w3.org/2000/svg" width="${coordinate(options.width)}" height="${coordinate(height)}" viewBox="0 0 ${coordinate(options.width)} ${coordinate(height)}" role="img" aria-labelledby="bli-figure-title bli-figure-description">`,
       `<title id="bli-figure-title">${escapeXml(title)}</title><desc id="bli-figure-description">${escapeXml(description)}</desc>`,
@@ -389,7 +389,7 @@
         finishSegment();
         if (path)
           svg.push(
-            `<path class="trace ${kind === "fit" ? "imported-fit" : "data"}" data-curve-id="${escapeXml(item.id)}" d="${path}" fill="none" stroke="${item.colour}" stroke-width="${options.lineWidth}" stroke-linecap="round" stroke-linejoin="round"${kind === "fit" ? ' stroke-dasharray="6 4"' : ""}><title>${escapeXml(item.name)}${kind === "fit" ? " — imported fit" : ""}</title></path>`,
+            `<path class="trace ${kind === "fit" ? "imported-fit" : "data"}" data-curve-id="${escapeXml(item.id)}" d="${path}" fill="none" stroke="${item.colour}" stroke-width="${options.lineWidth}" stroke-linecap="round" stroke-linejoin="round"${kind === "fit" ? ` stroke-dasharray="0 ${options.lineWidth * 3}"` : ""}><title>${escapeXml(item.name)}${kind === "fit" ? " — imported fit" : ""}</title></path>`,
           );
         for (const [x, y] of isolated)
           svg.push(
@@ -423,7 +423,7 @@
     }
     if (hasFits && options.showLegend)
       svg.push(
-        `<text x="24" y="${coordinate(legendStart + legendHeight)}" fill="#53616b" font-size="${Math.max(10, font - 1)}">Solid: imported data · Dashed: imported fit</text>`,
+        `<text x="24" y="${coordinate(legendStart + legendHeight)}" fill="#53616b" font-size="${Math.max(10, font - 1)}">Solid: imported data · Dotted: imported fit</text>`,
       );
     svg.push("</g></svg>");
     return svg.join("");
