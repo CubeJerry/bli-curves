@@ -1,0 +1,16 @@
+{
+  "name": "bli-curves",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Local Octet curve preparation and scientific figure export",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check app.js && node --check core.js && node --check figure.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}
