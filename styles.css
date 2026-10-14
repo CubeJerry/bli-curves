@@ -196,7 +196,7 @@ h2 {
   display: grid;
   gap: 8px;
 }
-.mode-selector label {
+fieldset.mode-selector label {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -357,8 +357,10 @@ label:not(.check) {
   font-size: 12px;
   font-weight: 600;
 }
-input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
-select {
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+  select
+) {
   width: 100%;
   min-height: 37px;
   padding: 8px 10px;
@@ -855,4 +857,8 @@ button:focus-visible {
   .plot svg {
     width: 100%;
   }
+}
+
+[hidden] {
+  display: none !important;
 }

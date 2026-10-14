@@ -266,15 +266,13 @@
         state.mode === "dilution"
           ? c.meta.concentration.trim() || sourceName(c.file)
           : c.meta.name.trim() || defaultName(c.file, c.block);
-      groups
-        .get(key)
-        .curves.push({
-          id: c.id,
-          label,
-          block: c.block,
-          source: c.file.name,
-          colour: c.meta.colour,
-        });
+      groups.get(key).curves.push({
+        id: c.id,
+        label,
+        block: c.block,
+        source: c.file.name,
+        colour: c.meta.colour,
+      });
     }
     return [...groups.values()];
   }
@@ -926,11 +924,21 @@
   });
   $("seriesNames").addEventListener("input", (e) => {
     if (!e.target.dataset.series) return;
-    state.seriesNames[e.target.dataset.series] = e.target.value;
+    const key = e.target.dataset.series;
+    state.seriesNames[key] = e.target.value;
+    // Keep existing inputs mounted when focus moves from a series name to a curve.
+    // Rebuilding the table on blur can remove the incoming focus target.
+    const curves = new Map(allCurves().map((curve) => [curve.id, curve]));
+    for (const row of $("curveTable").querySelectorAll("tbody tr[data-id]")) {
+      const curve = curves.get(row.dataset.id);
+      if (curve?.groupKey !== key) continue;
+      const source = row.querySelector(".source-cell small");
+      source.textContent = `${e.target.value} · ${curve.file.name}`;
+      source.title = source.textContent;
+    }
     changed();
     scheduleOutput();
   });
-  $("seriesNames").addEventListener("change", renderTable);
   $("curveTable").addEventListener("input", (e) => {
     if (!e.target.dataset.field) return;
     commitInput(e.target);
