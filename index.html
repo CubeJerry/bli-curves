@@ -155,6 +155,7 @@
               </div>
               <button id="resetNamesBtn" class="quiet">Reset names</button>
             </div>
+            <p class="help">Assign the same antigen / plot group to curves you want on one graph.</p>
             <div id="seriesNames" class="series-names hidden"></div>
             <details id="dilutionTools" class="hidden concentration-tools">
               <summary>Assign concentration labels</summary>
@@ -176,6 +177,11 @@
                 do not change the data or perform a fit.
               </p>
             </details>
+            <div class="group-controls">
+              <label>Plot group<select id="groupFilter"><option value="*">All plot groups</option></select></label>
+              <label>Sort rows<select id="rowSort"><option value="source">Source order</option><option value="group">Plot group, then curve name</option><option value="name">Curve name</option></select></label>
+              <button id="plotGroupBtn" type="button">Plot group</button>
+            </div>
             <div class="table-toolbar">
               <label class="search-label"
                 ><span class="visually-hidden"
@@ -193,6 +199,13 @@
                 </button>
               </div>
             </div>
+            <div class="row-tools">
+              <span id="rowSelection" role="status">0 rows selected</span>
+              <button id="selectRowsBtn" type="button">Select shown rows</button>
+              <button id="clearRowsBtn" type="button">Clear row selection</button>
+              <button id="plotRowsBtn" type="button" disabled>Plot selected rows together</button>
+            </div>
+            <p class="help">Click row numbers to pick any combination; Shift-click adds a range. Selected-row plots use your chosen rows, including rows with Use unchecked. The figure and exports follow the display choice below.</p>
             <div id="gridTools" class="grid-tools" role="toolbar" aria-label="Label spreadsheet tools">
               <span id="gridSelection" role="status">Select cells to edit</span>
               <button type="button" data-grid-action="all">Select all</button>
@@ -246,7 +259,8 @@
                 </p>
               </div>
               <label class="plot-select"
-                >Plot / export table<select id="plotSelect"></select
+                >Display<select id="plotLayout"><option value="group">One plot per plot group</option><option value="overlay">All included curves together</option><option value="selected">Selected rows together</option><option value="source">Source block + plot group (dilution)</option></select></label>
+              <label>Plot group / export table<select id="plotSelect"></select
               ></label>
             </div>
             <div id="plotNotice" class="notice hidden"></div>

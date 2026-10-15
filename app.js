@@ -27,6 +27,8 @@
     tables: [],
     currentTable: "",
     selection: null,
+    selectedRows: new Set(),
+    rowAnchor: null,
     undo: null,
     urls: [],
   };
@@ -89,12 +91,32 @@
   }
   function visibleCurves() {
     const query = $("searchInput").value.trim().toLowerCase();
-    return allCurves().filter((c) =>
-      `${c.file.name} ${c.meta.name} ${c.meta.antigen} ${c.meta.concentration} ${state.seriesNames[c.groupKey]}`
-        .toLowerCase()
-        .includes(query),
-    );
+    const group = $("groupFilter").value;
+    const curves = allCurves().filter(c => (group === "*" || c.meta.antigen.trim() === group) &&
+      `${c.file.name} ${c.meta.name} ${c.meta.antigen} ${c.meta.concentration} ${state.seriesNames[c.groupKey]}`.toLowerCase().includes(query));
+    if ($("rowSort").value === "group") curves.sort((a,b) => a.meta.antigen.trim().localeCompare(b.meta.antigen.trim()) || a.meta.name.localeCompare(b.meta.name, undefined, { numeric: true }));
+    if ($("rowSort").value === "name") curves.sort((a,b) => a.meta.name.localeCompare(b.meta.name, undefined, { numeric: true }));
+    return curves;
   }
+  function refreshGroupFilter() {
+    const prior = $("groupFilter").value;
+    const groups = [...new Set(allCurves().map(c => c.meta.antigen.trim()))].sort();
+    $("groupFilter").innerHTML = '<option value="*">All plot groups</option>' + groups.map(g => `<option value="${esc(g)}">${esc(g || "Ungrouped")}</option>`).join("");
+    $("groupFilter").value = groups.includes(prior) ? prior : "*";
+  }
+  function paintRows() {
+    const existing = new Set(allCurves().map(c => c.id));
+    for (const id of state.selectedRows) if (!existing.has(id)) state.selectedRows.delete(id);
+    for (const row of $("curveTable").querySelectorAll("tbody tr[data-id]")) {
+      const selected = state.selectedRows.has(row.dataset.id);
+      row.classList.toggle("row-selected", selected);
+      row.querySelector("[data-row-select]").setAttribute("aria-pressed", String(selected));
+    }
+    const hidden = [...state.selectedRows].filter(id => !visibleCurves().some(c => c.id === id)).length;
+    $("rowSelection").textContent = `${state.selectedRows.size} rows selected${hidden ? ` (${hidden} hidden by filter)` : ""}`;
+    $("plotRowsBtn").disabled = !state.selectedRows.size;
+  }
+
   function initializeFile(name, text) {
     const parsed = Core.parseResultFile(name, text);
     const file = { ...parsed, id: `file${++state.counter}`, text };
@@ -108,7 +130,7 @@
         colour: Figure.colourForIndex(Object.keys(state.meta).length),
       };
       state.seriesNames[String(block.blockNumber)] ??=
-        `Series ${block.blockNumber}`;
+        `Source block ${block.blockNumber}`;
     });
     return file;
   }
@@ -243,26 +265,28 @@
         const placeholder = dilution
           ? sourceName(c.file)
           : defaultName(c.file, c.block);
-        return `<tr data-id="${esc(c.id)}" class="${c.meta.include ? "" : "excluded"}"><td class="use-cell"><input type="checkbox" data-field="include" ${c.meta.include ? "checked" : ""} aria-label="Include ${esc(c.meta.name)}"></td><td class="source-cell"><strong>${esc(sourceName(c.file))}</strong><small title="${esc(sourceSub)}">${esc(sourceSub)}</small></td><td><input class="cell-input" data-field="${field}" data-row="${index}" data-col="0" value="${esc(labelValue)}" placeholder="${esc(placeholder)}" aria-label="${dilution ? "Concentration or label" : "Curve name"} for ${esc(defaultName(c.file, c.block))}"></td><td><input class="cell-input" data-field="antigen" data-row="${index}" data-col="1" value="${esc(c.meta.antigen)}" placeholder="All curves" aria-label="Antigen for ${esc(defaultName(c.file, c.block))}"></td><td class="colour-cell"><input type="color" data-field="colour" value="${esc(c.meta.colour)}" aria-label="Colour for ${esc(defaultName(c.file, c.block))}"></td></tr>`;
+        return `<tr data-id="${esc(c.id)}" class="${c.meta.include ? "" : "excluded"}"><td class="row-handle"><button type="button" data-row-select="${esc(c.id)}" aria-label="Select row ${index + 1}" aria-pressed="false">${index + 1}</button></td><td class="use-cell"><input type="checkbox" data-field="include" ${c.meta.include ? "checked" : ""} aria-label="Include ${esc(c.meta.name)}"></td><td class="source-cell"><strong>${esc(sourceName(c.file))}</strong><small title="${esc(sourceSub)}">${esc(sourceSub)}</small></td><td><input class="cell-input" data-field="${field}" data-row="${index}" data-col="0" value="${esc(labelValue)}" placeholder="${esc(placeholder)}" aria-label="${dilution ? "Concentration or label" : "Curve name"} for ${esc(defaultName(c.file, c.block))}"></td><td><input class="cell-input" data-field="antigen" data-row="${index}" data-col="1" value="${esc(c.meta.antigen)}" placeholder="All curves" aria-label="Antigen for ${esc(defaultName(c.file, c.block))}"></td><td class="colour-cell"><input type="color" data-field="colour" value="${esc(c.meta.colour)}" aria-label="Colour for ${esc(defaultName(c.file, c.block))}"></td></tr>`;
       })
       .join("");
     $("curveTable").innerHTML =
-      `<caption class="visually-hidden">Select, name and colour curves</caption><thead><tr><th>Use</th><th>Source</th><th><button type="button" data-select-col="0">A · ${dilution ? "Concentration / label" : "Curve name"}</button></th><th><button type="button" data-select-col="1">B · Antigen / plot group</button></th><th>Colour</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No curves match this filter.</td></tr>'}</tbody>`;
+      `<caption class="visually-hidden">Select, name and colour curves</caption><thead><tr><th scope="col">Row</th><th>Use</th><th>Source</th><th><button type="button" data-select-col="0">A · ${dilution ? "Concentration / label" : "Curve name"}</button></th><th><button type="button" data-select-col="1">B · Antigen / plot group</button></th><th>Colour</th></tr></thead><tbody>${rows || '<tr><td colspan="6">No curves match this filter.</td></tr>'}</tbody>`;
     paintSelection();
+    paintRows();
   }
   function groupsForExport() {
     const groups = new Map();
-    for (const c of allCurves().filter((c) => c.meta.include)) {
+    const layout = $("plotLayout").value;
+    for (const c of allCurves().filter(c => layout === "selected" ? state.selectedRows.has(c.id) : c.meta.include)) {
       const antigen = c.meta.antigen.trim();
       const key = JSON.stringify(
-        state.mode === "dilution" ? [c.groupKey, antigen] : [antigen],
+        layout === "selected" || layout === "overlay" ? [layout] : layout === "source" && state.mode === "dilution" ? [c.groupKey, antigen] : [antigen],
       );
       const groupName =
-        state.seriesNames[c.groupKey]?.trim() || `Series ${c.groupKey}`;
+        state.seriesNames[c.groupKey]?.trim() || `Source block ${c.groupKey}`;
       const title =
-        state.mode === "dilution"
+        layout === "selected" ? "Selected curves" : layout === "overlay" ? "All included curves" : layout === "source" && state.mode === "dilution"
           ? [groupName, antigen].filter(Boolean).join(" · ")
-          : antigen || "Binding curves";
+          : antigen || "Ungrouped";
       if (!groups.has(key)) groups.set(key, { id: key, title, curves: [] });
       const label =
         state.mode === "dilution"
@@ -290,6 +314,7 @@
     );
   }
   function updateOutput() {
+    refreshGroupFilter();
     const prior = currentTable();
     const priorKey = prior?.groupId;
     try {
@@ -307,10 +332,10 @@
             `<option value="${esc(t.id)}" ${t.id === state.currentTable ? "selected" : ""}>${esc(t.title)}</option>`,
         )
         .join("");
-      const count = allCurves().filter((c) => c.meta.include).length;
+      const count = allCurves().filter(c => $("plotLayout").value === "selected" ? state.selectedRows.has(c.id) : c.meta.include).length;
       $("exportSummary").textContent =
         `${count} curves · ${state.tables.length} table${state.tables.length === 1 ? "" : "s"} · ${options().normaliseTime ? "time starts at 0 s" : "original time"}${options().includeFit ? " · imported fits included" : ""}`;
-      $("curveCount").textContent = `${count} / ${allCurves().length} included`;
+      $("curveCount").textContent = `${allCurves().filter(c => c.meta.include).length} / ${allCurves().length} included`;
       for (const id of ["xlsxBtn", "pzfxBtn", "csvBtn"])
         $(id).disabled = !state.tables.length;
       renderFigure();
@@ -424,6 +449,7 @@
       .join("")}</tbody>`;
   }
   function render() {
+    refreshGroupFilter();
     renderFiles();
     renderSeriesNames();
     renderTable();
@@ -435,7 +461,7 @@
     $("modeHelp").textContent =
       state.mode === "single"
         ? "One row per measured curve. Antigen labels create separate plots and export tables."
-        : "Matching source block numbers form a series. Name the series below, then label each concentration.";
+        : "Label each concentration and assign a plot group. Plot groups control which curves appear together; source blocks are optional subgrouping.";
     $("fitHelp").textContent =
       state.mode === "single"
         ? "Single binding shows measured data by default. No fitting is performed."
@@ -459,6 +485,8 @@
       )
     )
       return;
+    state.selectedRows.clear(); state.rowAnchor = null;
+    $("plotLayout").value = "group"; $("groupFilter").value = "*";
     gridUndo.length = 0; gridRedo.length = 0;
     state.files = [];
     state.meta = {};
@@ -579,6 +607,7 @@
       format: "bli-curves",
       version: 1,
       mode: state.mode,
+      plotLayout: $("plotLayout").value,
       normaliseTime: $("normaliseTime").checked,
       fits: state.fits,
       seriesNames: state.seriesNames,
@@ -586,7 +615,7 @@
       files: state.files.map((f) => ({
         name: f.name,
         text: f.text,
-        curves: f.blocks.map((_, i) => state.meta[`${f.id}:${i}`]),
+        curves: f.blocks.map((_, i) => ({ ...state.meta[`${f.id}:${i}`], selected: state.selectedRows.has(`${f.id}:${i}`) })),
       })),
       plate: Array.from($("plateGrid").querySelectorAll("td")).map(
         (cell) => cell.textContent,
@@ -666,8 +695,13 @@
           seriesNames[key] =
             typeof p.seriesNames?.[key] === "string"
               ? p.seriesNames[key]
-              : `Series ${key}`;
+              : `Source block ${key}`;
         });
+      state.selectedRows.clear(); state.rowAnchor = null;
+      for (const f of rebuilt) f.blocks.forEach((_, i) => { if (f.saved[i]?.selected === true) state.selectedRows.add(`${f.id}:${i}`); });
+      gridUndo.length = 0; gridRedo.length = 0;
+      $("plotLayout").value = ["group", "source", "selected", "overlay"].includes(p.plotLayout) ? p.plotLayout : "group";
+      $("groupFilter").value = "*";
       state.files = rebuilt;
       state.meta = meta;
       state.seriesNames = seriesNames;
@@ -950,6 +984,39 @@
     changed();
     updateOutput();
   });
+  $("groupFilter").addEventListener("change", renderTable);
+  $("rowSort").addEventListener("change", renderTable);
+  $("plotLayout").addEventListener("change", updateOutput);
+  $("curveTable").addEventListener("click", e => {
+    const button = e.target.closest("[data-row-select]");
+    if (!button) return;
+    const id = button.dataset.rowSelect;
+    const rows = visibleCurves();
+    const start = rows.findIndex(c => c.id === state.rowAnchor), end = rows.findIndex(c => c.id === id);
+    if (e.shiftKey && start >= 0) {
+      for (const c of rows.slice(Math.min(start,end), Math.max(start,end)+1)) state.selectedRows.add(c.id);
+    } else {
+      if (state.selectedRows.has(id)) state.selectedRows.delete(id); else state.selectedRows.add(id);
+      state.rowAnchor = id;
+    }
+    paintRows();
+    if ($("plotLayout").value === "selected") updateOutput();
+  });
+  $("selectRowsBtn").addEventListener("click", () => { visibleCurves().forEach(c => state.selectedRows.add(c.id)); paintRows(); if ($("plotLayout").value === "selected") updateOutput(); });
+  $("clearRowsBtn").addEventListener("click", () => { state.selectedRows.clear(); paintRows(); if ($("plotLayout").value === "selected") updateOutput(); });
+  $("plotRowsBtn").addEventListener("click", () => {
+    $("plotLayout").value = "selected"; updateOutput(); $("plotSelect").scrollIntoView({ block: "center", behavior: "smooth" });
+  });
+  $("plotGroupBtn").addEventListener("click", () => {
+    $("plotLayout").value = "group"; updateOutput();
+    const group = $("groupFilter").value;
+    if (group !== "*") {
+      const table = state.tables.find(t => t.groupId === JSON.stringify([group]));
+      if (table) { state.currentTable = table.id; $("plotSelect").value = table.id; renderFigure(); renderData(); }
+      else message("This plot group has no included curves. Use Include shown to include them.");
+    }
+    $("plotSelect").scrollIntoView({ block: "center", behavior: "smooth" });
+  });
   $("searchInput").addEventListener("input", renderTable);
   for (const [id, include] of [
     ["selectAllBtn", true],
@@ -970,7 +1037,7 @@
       return;
     allCurves().forEach((c) => (c.meta.name = defaultName(c.file, c.block)));
     for (const key of Object.keys(state.seriesNames))
-      state.seriesNames[key] = `Series ${key}`;
+      state.seriesNames[key] = `Source block ${key}`;
     changed();
     renderSeriesNames();
     renderTable();

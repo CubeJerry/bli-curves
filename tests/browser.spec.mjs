@@ -121,10 +121,11 @@ test("demo loads without runtime errors, single mode hides fits, and edits survi
   await expect(page.locator("#plot .trace.data")).toHaveCount(6);
   await expect(page.locator("#plot .trace.imported-fit")).toHaveCount(0);
   await expect(page.locator("#curveTable th")).toHaveText([
+    "Row",
     "Use",
     "Source",
-    "Curve name",
-    "Antigen / plot group",
+    "A · Curve name",
+    "B · Antigen / plot group",
     "Colour",
   ]);
   await names(page).first().fill("VHH-3117");
@@ -193,9 +194,9 @@ test("antigen groups, filtered inclusion and exported tables stay in agreement",
   const data = await inspectXml(page, pzfx.buffer.toString());
   expect(data.invalid).toBe(false);
   expect(data.tables.map((table) => table.title).sort()).toEqual([
-    "Binding curves",
     "EGFR",
     "TNF",
+    "Ungrouped",
   ]);
   expect(
     data.tables.reduce((count, table) => count + table.columns.length, 0),
@@ -570,4 +571,35 @@ test("spreadsheet mouse drag and quoted Excel paste preserve rectangular cells",
   await expect(antigens(page).first()).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(names(page).nth(1)).toBeFocused();
+});
+
+
+test("plot groups filter and sort rows while arbitrary selections overlay together", async ({ page }) => {
+  await loadDemo(page);
+  await paste(names(page).first(), "C\tTNF\nA\tEGFR\nB\tEGFR");
+  await page.locator("#rowSort").selectOption("group");
+  await page.locator("#groupFilter").selectOption("EGFR");
+  await expect(names(page)).toHaveCount(2);
+  await expect(names(page).first()).toHaveValue("A");
+  await page.locator("#plotGroupBtn").click();
+  await expect(page.locator("#plot .trace.data")).toHaveCount(2);
+  await expect(page.locator("#plotSelect option:checked")).toHaveText("EGFR");
+  await page.locator("#selectRowsBtn").click();
+  await page.locator("#groupFilter").selectOption("TNF");
+  await page.locator("[data-row-select]").first().click();
+  await page.locator("#plotRowsBtn").click();
+  await expect(page.locator("#plot .trace.data")).toHaveCount(3);
+  await expect(page.locator("#rowSelection")).toContainText("3 rows selected (2 hidden by filter)");
+  await page.locator("#selectNoneBtn").click();
+  await expect(page.locator("#plot .trace.data")).toHaveCount(3);
+  const exported = await downloadFrom(page, "#pzfxBtn");
+  const data = await inspectXml(page, exported.buffer.toString());
+  expect(data.tables).toHaveLength(1);
+  expect(data.tables[0].columns).toHaveLength(3);
+  await page.locator("#plotLayout").selectOption("overlay");
+  await expect(page.locator("#plot .trace.data")).toHaveCount(5);
+  await page.locator("#clearRowsBtn").click();
+  await page.locator("#plotLayout").selectOption("selected");
+  await expect(page.locator("#plot .trace.data")).toHaveCount(0);
+  await expect(page.locator("#svgBtn")).toBeDisabled();
 });
