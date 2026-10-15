@@ -528,3 +528,46 @@ test("dilution concentration labels follow the selected plate axis", async ({
       .evaluateAll((inputs) => inputs.map((input) => input.value)),
   ).toEqual(["40 nM", "20 nM", "40 nM", ""]);
 });
+
+
+test("spreadsheet selects, fills, clears and restores label ranges", async ({ page }) => {
+  await loadDemo(page);
+  await paste(names(page).first(), "One\tEGFR\nTwo\tTNF\nThree\tHER2");
+  await names(page).first().click();
+  await names(page).first().press("Shift+ArrowRight");
+  await page.keyboard.press("Shift+ArrowDown");
+  await expect(page.locator(".selected-cell")).toHaveCount(4);
+  await page.getByRole("button", { name: "Fill down", exact: true }).click();
+  await expect(names(page).nth(1)).toHaveValue("One");
+  await expect(antigens(page).nth(1)).toHaveValue("EGFR");
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(names(page).nth(1)).toHaveValue("Two");
+  await expect(antigens(page).nth(1)).toHaveValue("TNF");
+  await page.getByRole("button", { name: "Redo", exact: true }).click();
+  await expect(names(page).nth(1)).toHaveValue("One");
+  await page.locator('[data-select-col="1"]').click();
+  await expect(page.locator(".selected-cell")).toHaveCount(6);
+  await page.getByRole("button", { name: "Clear", exact: true }).click();
+  await expect(antigens(page).first()).toHaveValue("");
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(antigens(page).first()).toHaveValue("EGFR");
+});
+
+test("spreadsheet mouse drag and quoted Excel paste preserve rectangular cells", async ({ page }) => {
+  await loadDemo(page);
+  const first = await names(page).first().boundingBox();
+  const last = await antigens(page).nth(2).boundingBox();
+  await page.mouse.move(first.x + 10, first.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(last.x + 10, last.y + 10, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.locator(".selected-cell")).toHaveCount(6);
+  await paste(names(page).first(), '"VHH ""one"""\tEGFR\nVHH-2\tTNF');
+  await expect(names(page).first()).toHaveValue('VHH "one"');
+  await expect(antigens(page).nth(1)).toHaveValue("TNF");
+  await names(page).first().click();
+  await page.keyboard.press("ArrowRight");
+  await expect(antigens(page).first()).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(names(page).nth(1)).toBeFocused();
+});

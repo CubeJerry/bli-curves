@@ -862,3 +862,15 @@ button:focus-visible {
 [hidden] {
   display: none !important;
 }
+
+/* Spreadsheet label editing */
+.grid-tools { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:9px; background:#f0f5f6; border:1px solid #d4e0e4; border-bottom:0; border-radius:8px 8px 0 0; }
+.grid-tools button { padding:5px 9px; font-size:12px; min-height:32px; }
+#gridSelection { font-size:12px; font-variant-numeric:tabular-nums; margin-right:auto; min-width:135px; }
+#curveTable { border:1px solid #d4e0e4; }
+#curveTable td:has(.cell-input) { padding:0; border-right:1px solid #d4e0e4; }
+#curveTable .cell-input { min-height:48px; border:0; border-radius:0; background:white; padding:10px; }
+#curveTable .selected-cell { background:#dceff0 !important; outline:1px solid #72aeb3 !important; }
+#curveTable .cell-input:focus { outline:2px solid var(--accent) !important; outline-offset:-2px; }
+#curveTable th button { border:0; background:transparent; padding:4px 0; font:inherit; color:inherit; text-align:left; width:100%; }
+#curveTable th button:hover { color:var(--accent); }

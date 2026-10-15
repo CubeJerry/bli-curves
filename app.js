@@ -229,6 +229,7 @@
   function renderTable() {
     const curves = visibleCurves();
     state.selection = null;
+    gridEditing = false;
     $("curveCount").textContent =
       `${allCurves().filter((c) => c.meta.include).length} / ${allCurves().length} included`;
     const dilution = state.mode === "dilution";
@@ -246,7 +247,8 @@
       })
       .join("");
     $("curveTable").innerHTML =
-      `<caption class="visually-hidden">Select, name and colour curves</caption><thead><tr><th>Use</th><th>Source</th><th>${dilution ? "Concentration / label" : "Curve name"}</th><th>Antigen / plot group</th><th>Colour</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No curves match this filter.</td></tr>'}</tbody>`;
+      `<caption class="visually-hidden">Select, name and colour curves</caption><thead><tr><th>Use</th><th>Source</th><th><button type="button" data-select-col="0">A · ${dilution ? "Concentration / label" : "Curve name"}</button></th><th><button type="button" data-select-col="1">B · Antigen / plot group</button></th><th>Colour</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No curves match this filter.</td></tr>'}</tbody>`;
+    paintSelection();
   }
   function groupsForExport() {
     const groups = new Map();
@@ -457,6 +459,7 @@
       )
     )
       return;
+    gridUndo.length = 0; gridRedo.length = 0;
     state.files = [];
     state.meta = {};
     state.seriesNames = {};
@@ -732,6 +735,39 @@
       `${count} concentration labels applied. Unmatched wells were left unchanged.`,
     );
   }
+  let gridEditing = false;
+  let gridDragging = false;
+  const gridUndo = [], gridRedo = [];
+  function gridSnapshot() {
+    return allCurves().map(c => ({ id: c.id, name: c.meta.name, concentration: c.meta.concentration, antigen: c.meta.antigen }));
+  }
+  function rememberGrid() {
+    const snapshot = JSON.stringify(gridSnapshot());
+    if (gridUndo.at(-1) !== snapshot) gridUndo.push(snapshot);
+    if (gridUndo.length > 100) gridUndo.shift();
+    gridRedo.length = 0;
+  }
+  function restoreGrid(from, to) {
+    if (!from.length) return;
+    to.push(JSON.stringify(gridSnapshot()));
+    for (const row of JSON.parse(from.pop())) {
+      if (state.meta[row.id]) Object.assign(state.meta[row.id], { name: row.name, concentration: row.concentration, antigen: row.antigen });
+    }
+    for (const cell of $("curveTable").querySelectorAll(".cell-input")) {
+      cell.value = state.meta[cell.closest("tr").dataset.id][cell.dataset.field];
+    }
+    changed(); updateOutput(); paintSelection();
+  }
+  function gridBulk(action) {
+    const cells = selectedInputs();
+    if (!cells.length) return;
+    rememberGrid();
+    const top = Math.min(...cells.map(c => position(c).row));
+    const left = Math.min(...cells.map(c => position(c).col));
+    const values = cells.map(cell => action === "clear" ? "" : action === "down" ? cellAt(top, position(cell).col).value : cellAt(position(cell).row, left).value);
+    cells.forEach((cell, i) => { cell.value = values[i]; commitInput(cell); });
+    gridEditing = false; updateOutput(); paintSelection();
+  }
   function selectedInputs() {
     if (!state.selection) return [];
     const { anchor, focus } = state.selection;
@@ -757,14 +793,29 @@
   }
   function paintSelection() {
     const selected = new Set(selectedInputs());
+    const cells = [...selected];
+    $("gridSelection").textContent = cells.length ? `${String.fromCharCode(65 + position(cells[0]).col)}${position(cells[0]).row + 1}:${String.fromCharCode(65 + position(cells.at(-1)).col)}${position(cells.at(-1)).row + 1} · ${cells.length} cell${cells.length === 1 ? "" : "s"}` : "Select cells to edit";
+    for (const button of $("gridTools").querySelectorAll("[data-grid-action]")) {
+      const action = button.dataset.gridAction;
+      button.disabled = action === "undo" ? !gridUndo.length : action === "redo" ? !gridRedo.length : action === "all" ? !visibleCurves().length : !cells.length;
+    }
     $("curveTable")
       .querySelectorAll(".cell-input")
       .forEach((input) =>
         input.classList.toggle(
           "selected-cell",
-          selected.size > 1 && selected.has(input),
+          selected.has(input),
         ),
       );
+  }
+  function gridText() {
+    const rows = new Map();
+    for (const cell of selectedInputs()) {
+      if (!rows.has(cell.dataset.row)) rows.set(cell.dataset.row, []);
+      const value = cell.value;
+      rows.get(cell.dataset.row).push(/["\t\r\n]/.test(value) ? '"' + value.replace(/"/g, '""') + '"' : value);
+    }
+    return [...rows.values()].map(row => row.join("\t")).join("\r\n");
   }
   function commitInput(input) {
     const id = input.closest("tr").dataset.id;
@@ -774,16 +825,17 @@
     changed();
   }
   function pasteCells(event) {
-    const input = event.target;
+    let input = event.target;
     if (!input.matches(".cell-input")) return;
     const text = event.clipboardData.getData("text/plain");
     if (!/[\t\r\n]/.test(text) && selectedInputs().length <= 1) return;
     event.preventDefault();
-    const rows = text
-      .replace(/\r\n?/g, "\n")
-      .replace(/\n$/, "")
-      .split("\n")
-      .map((row) => row.split("\t"));
+    let rows;
+    try { rows = Core.parseDelimited(text, "\t"); }
+    catch (error) { message(`Paste failed: ${error.message}`, true); return; }
+    if (!rows.length) rows = [[""]];
+    rememberGrid();
+    gridEditing = false;
     if (
       rows.length === 1 &&
       rows[0].length === 1 &&
@@ -794,6 +846,8 @@
         commitInput(cell);
       });
     else {
+      const selected = selectedInputs();
+      if (selected.length > 1) input = selected[0];
       const start = position(input);
       let clipped = 0,
         last = input;
@@ -942,6 +996,7 @@
   $("curveTable").addEventListener("input", (e) => {
     if (!e.target.dataset.field) return;
     commitInput(e.target);
+    paintSelection();
     e.target
       .closest("tr")
       .classList.toggle(
@@ -951,64 +1006,86 @@
     scheduleOutput();
   });
   $("curveTable").addEventListener("paste", pasteCells);
-  $("curveTable").addEventListener("focusin", (e) => {
-    if (e.target.matches(".cell-input")) {
-      e.target.select();
-      if (!state.selection) selectCells(e.target);
-    }
+  $("curveTable").addEventListener("beforeinput", e => {
+    if (e.target.matches(".cell-input")) rememberGrid();
   });
-  $("curveTable").addEventListener("click", (e) => {
+  $("curveTable").addEventListener("focusin", e => {
     if (!e.target.matches(".cell-input")) return;
-    const anchor = state.selection
-      ? cellAt(state.selection.anchor.row, state.selection.anchor.col)
-      : null;
-    selectCells(e.shiftKey && anchor ? anchor : e.target, e.target);
+    if (!gridDragging) { selectCells(e.target); e.target.select(); }
   });
-  $("curveTable").addEventListener("keydown", (e) => {
+  $("curveTable").addEventListener("pointerdown", e => {
+    if (!e.target.matches(".cell-input") || e.button !== 0 || gridEditing && document.activeElement === e.target && !e.shiftKey) return;
+    const anchor = e.shiftKey && state.selection ? cellAt(state.selection.anchor.row, state.selection.anchor.col) : e.target;
+    gridDragging = true; gridEditing = false;
+    e.preventDefault(); e.target.focus(); e.target.select(); selectCells(anchor, e.target);
+  });
+  $("curveTable").addEventListener("pointerover", e => {
+    if (!gridDragging || !e.target.matches(".cell-input")) return;
+    const anchor = cellAt(state.selection.anchor.row, state.selection.anchor.col);
+    selectCells(anchor, e.target);
+    e.target.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
+  document.addEventListener("pointerup", () => { gridDragging = false; });
+  document.addEventListener("pointercancel", () => { gridDragging = false; });
+  $("curveTable").addEventListener("dblclick", e => {
     if (!e.target.matches(".cell-input")) return;
-    const p = position(e.target);
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const next = cellAt(p.row + (e.shiftKey ? -1 : 1), p.col);
-      if (next) {
-        selectCells(next);
-        next.focus();
-      }
-    }
-    if (e.shiftKey && ["ArrowDown", "ArrowUp"].includes(e.key)) {
-      e.preventDefault();
-      const next = cellAt(p.row + (e.key === "ArrowDown" ? 1 : -1), p.col);
-      const anchor = state.selection
-        ? cellAt(state.selection.anchor.row, state.selection.anchor.col)
-        : e.target;
-      if (next) {
-        selectCells(anchor, next);
-        next.focus();
-      }
-    }
-    if (e.key === "Escape") {
-      state.selection = null;
-      paintSelection();
-    }
+    selectCells(e.target); gridEditing = true;
+    e.target.setSelectionRange(e.target.value.length, e.target.value.length);
   });
-  document.addEventListener("copy", (e) => {
-    if (
-      !document.activeElement?.matches("#curveTable .cell-input") ||
-      selectedInputs().length < 2
-    )
+  $("curveTable").addEventListener("click", e => {
+    const header = e.target.closest("[data-select-col]");
+    if (!header) return;
+    const col = Number(header.dataset.selectCol), last = visibleCurves().length - 1;
+    if (last < 0) return;
+    const first = cellAt(0, col); first.focus(); selectCells(first, cellAt(last, col));
+  });
+  $("curveTable").addEventListener("keydown", e => {
+    if (!e.target.matches(".cell-input") || e.isComposing) return;
+    const command = e.ctrlKey || e.metaKey;
+    if (command && ["z", "y"].includes(e.key.toLowerCase())) {
+      e.preventDefault(); restoreGrid(e.shiftKey || e.key.toLowerCase() === "y" ? gridRedo : gridUndo, e.shiftKey || e.key.toLowerCase() === "y" ? gridUndo : gridRedo); return;
+    }
+    if (command && e.key.toLowerCase() === "a" && !gridEditing) {
+      e.preventDefault(); selectCells(cellAt(0, 0), cellAt(visibleCurves().length - 1, 1)); return;
+    }
+    if (command && ["d", "r"].includes(e.key.toLowerCase()) && !gridEditing) {
+      e.preventDefault(); gridBulk(e.key.toLowerCase() === "d" ? "down" : "right"); return;
+    }
+    if (e.key === "F2") { e.preventDefault(); gridEditing = true; selectCells(e.target); e.target.setSelectionRange(e.target.value.length, e.target.value.length); return; }
+    if (e.key === "Escape") { gridEditing = false; selectCells(e.target); e.target.select(); return; }
+    if (["Delete", "Backspace"].includes(e.key) && !gridEditing) { e.preventDefault(); gridBulk("clear"); return; }
+    const arrows = { ArrowDown: [1,0], ArrowUp: [-1,0], ArrowLeft: [0,-1], ArrowRight: [0,1] };
+    if (e.key === "Enter" || e.key === "Tab" || arrows[e.key] && !gridEditing) {
+      const p = arrows[e.key] ? state.selection?.focus || position(e.target) : position(e.target);
+      let row = p.row, col = p.col;
+      if (e.key === "Tab") { col += e.shiftKey ? -1 : 1; if (col > 1) { col = 0; row++; } if (col < 0) { col = 1; row--; } }
+      else if (e.key === "Enter") row += e.shiftKey ? -1 : 1;
+      else { row += arrows[e.key][0]; col += arrows[e.key][1]; }
+      const next = cellAt(row, col);
+      if (!next && e.key === "Tab") return;
+      e.preventDefault(); gridEditing = false;
+      if (next) {
+        const anchor = arrows[e.key] && e.shiftKey && state.selection ? cellAt(state.selection.anchor.row, state.selection.anchor.col) : next;
+        next.focus(); next.select(); selectCells(anchor, next);
+      }
       return;
-    e.preventDefault();
-    const cells = selectedInputs();
-    const rows = new Map();
-    for (const input of cells) {
-      const r = input.dataset.row;
-      if (!rows.has(r)) rows.set(r, []);
-      rows.get(r).push(input.value);
     }
-    e.clipboardData.setData(
-      "text/plain",
-      [...rows.values()].map((row) => row.join("\t")).join("\n"),
-    );
+    if (!command && e.key.length === 1 && !gridEditing) { selectCells(e.target); e.target.select(); gridEditing = true; }
+  });
+  for (const kind of ["copy", "cut"]) document.addEventListener(kind, e => {
+    if (!document.activeElement?.matches("#curveTable .cell-input") || !selectedInputs().length || gridEditing && selectedInputs().length === 1) return;
+    e.preventDefault(); e.clipboardData.setData("text/plain", gridText());
+    if (kind === "cut") gridBulk("clear");
+  });
+  $("gridTools").addEventListener("click", async e => {
+    const action = e.target.closest("[data-grid-action]")?.dataset.gridAction;
+    if (!action) return;
+    if (action === "undo" || action === "redo") restoreGrid(action === "undo" ? gridUndo : gridRedo, action === "undo" ? gridRedo : gridUndo);
+    else if (action === "all") { const first = cellAt(0,0), last = cellAt(visibleCurves().length - 1,1); if (first && last) { first.focus(); selectCells(first,last); } }
+    else if (action === "copy") {
+      try { await navigator.clipboard.writeText(gridText()); message("Selected cells copied."); }
+      catch { selectedInputs()[0]?.focus(); message("Use Ctrl+C or ⌘C to copy the selected cells."); }
+    } else gridBulk(action);
   });
   $("applyConcentrationBtn").addEventListener("click", fillConcentrations);
   $("plotSelect").addEventListener("change", () => {

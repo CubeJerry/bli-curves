@@ -193,6 +193,16 @@
                 </button>
               </div>
             </div>
+            <div id="gridTools" class="grid-tools" role="toolbar" aria-label="Label spreadsheet tools">
+              <span id="gridSelection" role="status">Select cells to edit</span>
+              <button type="button" data-grid-action="all">Select all</button>
+              <button type="button" data-grid-action="copy">Copy</button>
+              <button type="button" data-grid-action="down" title="Ctrl/⌘ D">Fill down</button>
+              <button type="button" data-grid-action="right" title="Ctrl/⌘ R">Fill right</button>
+              <button type="button" data-grid-action="clear">Clear</button>
+              <button type="button" data-grid-action="undo" title="Ctrl/⌘ Z">Undo</button>
+              <button type="button" data-grid-action="redo" title="Ctrl/⌘ Shift Z">Redo</button>
+            </div>
             <div class="table-scroll">
               <table id="curveTable">
                 <caption class="visually-hidden">
@@ -201,9 +211,10 @@
               </table>
             </div>
             <p id="pasteHint" class="help table-hint">
-              Paste rows or a rectangular block from Excel into the label
-              fields. Enter moves down; Shift-click selects a range to copy or
-              fill.
+              Drag or Shift-click to select cells. Click a column heading to select its labels.
+              Copy/paste with Excel; paste one value to fill a selection. Arrow keys and Tab move between cells;
+              Enter moves down. Double-click or F2 edits text. Ctrl/⌘ Z undoes label edits.
+              Selections and bulk edits apply only to visible rows.
             </p>
             <details class="plate-panel">
               <summary>
