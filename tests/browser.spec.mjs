@@ -603,3 +603,22 @@ test("plot groups filter and sort rows while arbitrary selections overlay togeth
   await expect(page.locator("#plot .trace.data")).toHaveCount(0);
   await expect(page.locator("#svgBtn")).toBeDisabled();
 });
+
+test("combined CSV keeps source labels and groups matching Plate Columns", async ({ page }) => {
+  const text = [
+    'Conc1,5e-7,,Conc1,5e-7,,Conc1,2.5e-7,,Conc1,2.5e-7,,',
+    't1A2,t1A2,t1A2,t1A2,t1A2,t1A2,t1B2,t1B2,t1B2,t1B2,t1B2,t1B2,',
+    'Time1,Data1,Fit1,Time2,Data2,Fit2,Time3,Data3,Fit3,Time4,Data4,Fit4,',
+    '0,0,0,0,0,0,0,0,0,0,0,0,',
+    '1,1,0.9,1,2,1.9,1,3,2.9,1,4,3.9,'
+  ].join('\r\n');
+  await page.locator('#fileInput').setInputFiles({name:'combined.csv',mimeType:'text/csv',buffer:Buffer.from(text)});
+  for (const [i, value] of ['t1A2 · Plate Column 1','t1A2 · Plate Column 2','t1B2 · Plate Column 1','t1B2 · Plate Column 2'].entries()) await expect(names(page).nth(i)).toHaveValue(value);
+  await page.locator('input[name="mode"][value="dilution"]').check();
+  await expect(page.locator('#seriesNames input')).toHaveCount(2);
+  for (const [i,value] of ['5e-7','5e-7','2.5e-7','2.5e-7'].entries()) await expect(page.locator('[data-field="concentration"]').nth(i)).toHaveValue(value);
+  await page.locator('#plotLayout').selectOption('source');
+  await expect(page.locator('#plotSelect option')).toHaveCount(2);
+  await expect(page.locator('#plot .trace.data')).toHaveCount(2);
+  await expect(page.locator('#plot .trace.imported-fit')).toHaveCount(2);
+});

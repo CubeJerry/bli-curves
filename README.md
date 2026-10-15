@@ -29,7 +29,7 @@ repository and open `index.html`. The five app files must stay together:
    then choose **Plot selected rows together**. Selections survive filtering;
    the selected-row count identifies hidden rows. This explicit selection
    overrides the Use checkboxes. Other display choices use included curves:
-   all curves together, per plot group, or source block plus group for dilution.
+   all curves together, per plot group, or Plate Column plus group for dilution.
 5. **Export.** SVG and PNG save the displayed figure. XLSX and PZFX contain all
    tables in the chosen display layout; CSV saves the displayed table. Selected
    rows therefore produce a comparison export as well as a comparison plot.
@@ -133,3 +133,10 @@ structure and cross-format agreement; with openpyxl installed it also reads
 workbooks through that separate implementation. Browser checks exercise the
 user workflow, downloads, project round trips and mobile layout. CI runs all
 three layers. Pages publication stages only the five app files and `.nojekyll`.
+
+Combined Octet CSV exports are accepted directly. A repeated source-label row
+above Time/Data/Fit is retained (for example `t1A2`). Each source's successive
+curve triplets receive Plate Column numbers starting at 1, so corresponding
+columns across sources can be grouped. Original numbered headers and each
+triplet's concentration/start/stop values are retained. Plate Column numbering
+is the curve order within a source, not an inferred physical well address.
