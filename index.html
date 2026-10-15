@@ -1,113 +1,422 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Process Octet Files</title>
-  <link rel="stylesheet" href="styles.css?v=20260704-large-pzfx" />
-</head>
-<body>
-  <main class="wrap">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Prepare Octet binding curves, create scientific figures, and export data to Prism or Excel. Files stay in your browser."
+    />
+    <title>BLI Curves · Octet to figure</title>
+    <link rel="stylesheet" href="styles.css?v=2" />
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">Skip to workspace</a>
     <header class="topbar">
-      <div class="titleBlock">
-        <div class="tag"><span class="dot"></span> Browser-only Octet result processor</div>
-        <h1>Process Octet Files</h1>
-        <p class="sub">Drop Octet result exports, rename detected fits, then export clean Prism-ready Excel workbooks or PZFX files.</p>
+      <a class="brand" href="./" aria-label="BLI Curves home"
+        ><span class="brand-mark" aria-hidden="true">BLI</span
+        ><span>BLI Curves<small>Octet to figure</small></span></a
+      >
+      <div class="top-actions">
+        <span class="privacy">Files stay in your browser</span
+        ><button id="openProjectBtn" class="quiet">Open project</button
+        ><button id="saveProjectBtn" disabled>Save project</button>
       </div>
-      <div class="privacy">Runs locally in your browser</div>
     </header>
-
-    <div class="app">
-      <aside class="card panel">
-        <h2>Setup</h2>
-        <p>Choose your BLI setup, then drag in all result files for that run.</p>
-
-        <div class="label">Mode</div>
-        <div class="modeGrid" id="modeGrid">
-          <label class="mode"><input type="radio" name="mode" value="dilution" checked><b>Dilution series</b><span>Align Fit1 across files, Fit2 across files, etc. Exports one workbook sheet or Prism XY table per fit group.</span></label>
-          <label class="mode"><input type="radio" name="mode" value="single"><b>Single binding curves</b><span>Every fit in every file is an independent curve. Exports one workbook sheet or one Prism XY table with all selected curves together.</span></label>
-        </div>
-
-        <div class="label">Files</div>
-        <div id="drop" class="drop">
-          <div class="dropIcon">⇣</div>
-          <h2>Drag files here</h2>
-          <p>Accepts <span class="kbd">.txt</span>, <span class="kbd">.csv</span>, and <span class="kbd">.tsv</span> result files.</p>
-          <div class="buttonRow"><button type="button" class="btn" id="pickBtn">Choose files</button><button type="button" class="btn secondary" id="clearBtn" disabled>Clear</button></div>
-          <input id="fileInput" type="file" multiple accept=".txt,.csv,.tsv,text/plain,text/csv" />
-        </div>
-        <div id="status" class="status pillrow hidden"></div>
-
-        <div id="loadedFiles" class="hidden">
-          <div class="label">Loaded Files</div>
-          <div class="fileList" id="fileList"></div>
-        </div>
-
+    <div
+      id="message"
+      class="message hidden"
+      role="status"
+      aria-live="polite"
+    ></div>
+    <main id="workspace" class="workspace">
+      <aside class="sidebar" aria-label="Import and setup">
+        <section>
+          <h1>Prepare your curves.</h1>
+          <p class="lede">
+            Import an Octet result export. Name your curves, check the plot, and
+            take it where you need.
+          </p>
+          <div id="drop" class="drop">
+            <strong>Add result files</strong>
+            <p>Drop TXT, CSV or TSV files here.</p>
+            <button id="pickBtn" class="primary">Choose files</button>
+            <input
+              id="fileInput"
+              hidden
+              type="file"
+              multiple
+              accept=".txt,.csv,.tsv"
+            />
+            <input id="projectInput" hidden type="file" accept=".json" />
+          </div>
+          <div class="import-foot">
+            <button id="demoBtn" class="text-button">Try example data</button
+            ><span id="importStatus" role="status"></span>
+          </div>
+        </section>
+        <section class="setup-section">
+          <h2>Experiment</h2>
+          <fieldset class="mode-selector">
+            <legend class="visually-hidden">Experiment mode</legend>
+            <label
+              ><input type="radio" name="mode" value="single" checked /><span
+                ><b>Single binding</b
+                ><small>Compare independent curves.</small></span
+              ></label
+            >
+            <label
+              ><input type="radio" name="mode" value="dilution" /><span
+                ><b>Dilution series</b
+                ><small>Group matching blocks across files.</small></span
+              ></label
+            >
+          </fieldset>
+          <label class="check"
+            ><input id="normaliseTime" type="checkbox" checked /> Start each
+            curve at 0 s</label
+          >
+          <label class="check"
+            ><input id="includeFit" type="checkbox" /> Include imported fit
+            traces</label
+          >
+          <p id="fitHelp" class="help">
+            Single binding shows measured data by default. No fitting is
+            performed.
+          </p>
+        </section>
+        <section id="loadedSection" class="setup-section hidden">
+          <div class="section-head">
+            <h2>Source files <span id="fileCount" class="count"></span></h2>
+            <button id="clearBtn" class="text-button">Clear all</button>
+          </div>
+          <div id="fileList" class="file-list"></div>
+          <button id="undoBtn" class="text-button hidden">
+            Undo file removal
+          </button>
+        </section>
+        <details class="setup-section">
+          <summary>Import notes</summary>
+          <p class="help">
+            Use text result exports with repeating Time / Data columns and
+            optional Fit columns. Raw Octet acquisition folders and FRD files
+            are not supported.
+          </p>
+          <p class="help">
+            Tab, comma and semicolon delimiters are detected. Numeric locale
+            issues and missing values are reported below the file list.
+          </p>
+          <p class="help">
+            No smoothing, reference subtraction, baseline correction or kinetic
+            fitting is applied.
+          </p>
+        </details>
       </aside>
-
-      <section class="card panel mainPanel">
-        <div id="emptyState" class="empty">
-          <div><b>Upload files to begin</b><span>The rename panel will appear here after the app detects Time/Data/Fit blocks.</span></div>
-        </div>
-
-        <div id="renameSection" class="hidden">
-          <div class="sectionHead">
-            <div>
-              <h2 id="renameTitle">Rename detected fits</h2>
-              <p id="renameHelp">Custom names are used as sheet/table names and as column labels in the exported workbook or Prism PZFX file.</p>
-            </div>
-            <div class="buttonRow tight"><button type="button" class="btn secondary" id="clearNamesBtn">Clear all names</button></div>
-          </div>
-          <div class="tableWrap"><table id="renameTable"></table></div>
-          <div class="copyHint">Tip: paste a block from Excel into any name or antigen box to fill downward. Click one box, Shift-click another, then Ctrl/Cmd+C to copy that range back out.</div>
-          <div id="dilutionTools" class="dilutionTools hidden">
-            <div class="dilutionGrid">
-              <label>Series values
-                <input id="dilutionValuesInput" type="text" placeholder="200, 100, 50, 25, 12.5">
-              </label>
-              <label>Unit
-                <input id="dilutionUnitInput" type="text" value="nM" placeholder="nM">
-              </label>
-            </div>
-            <div class="help">Optional. Values are assigned by plate row in order: A, B, C, D, E, F, G, H. If filled, exported dilution columns use these labels instead of A1/B1/etc.</div>
-          </div>
-          <div id="previewPanel" class="previewPanel">
-            <div class="previewTop">
+      <div class="main-content">
+        <section id="emptyState" class="empty-state">
+          <span class="eyebrow">A clearer path from instrument to figure</span>
+          <h2>Your binding curves,<br />ready to use.</h2>
+          <p>
+            A clean plot, editable labels and data you can carry straight into
+            Prism or Excel.
+          </p>
+          <ol>
+            <li>
+              <b>Import</b><span>One file or an entire result batch.</span>
+            </li>
+            <li>
+              <b>Prepare</b><span>Name curves and separate antigens.</span>
+            </li>
+            <li>
+              <b>Export</b><span>Vector figures, PNG, XLSX or PZFX.</span>
+            </li>
+          </ol>
+          <p class="help">
+            Everything runs locally, including the exports. Save a project to
+            keep your data and edits together.
+          </p>
+        </section>
+        <section
+          id="issuesPanel"
+          class="issues hidden"
+          aria-label="Import diagnostics"
+        >
+          <details open>
+            <summary id="issueSummary">Import notes</summary>
+            <ul id="issuesList"></ul>
+          </details>
+        </section>
+        <div id="workPanels" class="hidden">
+          <section class="panel curves-panel">
+            <div class="section-head">
               <div>
-                <div class="label">Plot preview</div>
-                <p id="previewHelp">Quick visual check of parsed curves before export.</p>
+                <h2>Curves <span id="curveCount" class="count"></span></h2>
+                <p id="modeHelp" class="help"></p>
               </div>
-              <label id="previewSelectWrap" class="previewSelectWrap">Preview group
-                <select id="previewSelect"></select>
-              </label>
+              <button id="resetNamesBtn" class="quiet">Reset names</button>
             </div>
-            <div class="canvasBox"><canvas id="previewCanvas"></canvas></div>
-            <div id="previewLegend" class="previewLegend"></div>
-          </div>
-
-          <div id="plateReference" class="platePanel">
-          <div class="label">96-well reference</div>
-          <p class="plateIntro">Paste your Excel plate setup here.</p>
-          <div class="plateActions">
-            <button type="button" class="btn secondary mini" id="pastePlateBtn">Paste from clipboard</button>
-            <button type="button" class="btn secondary mini" id="clearPlateBtn">Clear plate</button>
-          </div>
-          <div class="plateWrap"><table class="plateGrid" id="plateGrid"></table></div>
-          <div class="plateCurrent" id="plateCurrent"><span class="muted">Use the plate as a visual reference while naming curves.</span></div>
+            <p class="help">Assign the same antigen / plot group to curves you want on one graph.</p>
+            <div id="seriesNames" class="series-names hidden"></div>
+            <details id="dilutionTools" class="hidden concentration-tools">
+              <summary>Assign concentration labels</summary>
+              <div class="form-grid">
+                <label
+                  >Values, in order (decimal points)<input
+                    id="concentrationValues"
+                    placeholder="200, 100, 50, 25, 12.5" /></label
+                ><label>Unit<input id="concentrationUnit" value="nM" /></label
+                ><label
+                  >Assign by<select id="concentrationDirection">
+                    <option value="row">Plate row (A–H)</option>
+                    <option value="column">Plate column (1–12)</option>
+                  </select></label
+                ><button id="applyConcentrationBtn">Apply labels</button>
+              </div>
+              <p class="help">
+                Applies to files with a recognised well in the filename. Labels
+                do not change the data or perform a fit.
+              </p>
+            </details>
+            <div class="group-controls">
+              <label>Plot group<select id="groupFilter"><option value="*">All plot groups</option></select></label>
+              <label>Sort rows<select id="rowSort"><option value="source">Source order</option><option value="group">Plot group, then curve name</option><option value="name">Curve name</option></select></label>
+              <button id="plotGroupBtn" type="button">Plot group</button>
+            </div>
+            <div class="table-toolbar">
+              <label class="search-label"
+                ><span class="visually-hidden"
+                  >Filter curves by name, antigen or file</span
+                ><input
+                  id="searchInput"
+                  type="search"
+                  placeholder="Find a curve, antigen or source…"
+              /></label>
+              <div class="button-row">
+                <button id="selectAllBtn" class="quiet small">
+                  Include shown</button
+                ><button id="selectNoneBtn" class="quiet small">
+                  Exclude shown
+                </button>
+              </div>
+            </div>
+            <div class="row-tools">
+              <span id="rowSelection" role="status">0 rows selected</span>
+              <button id="selectRowsBtn" type="button">Select shown rows</button>
+              <button id="clearRowsBtn" type="button">Clear row selection</button>
+              <button id="plotRowsBtn" type="button" disabled>Plot selected rows together</button>
+            </div>
+            <p class="help">Click row numbers to pick any combination; Shift-click adds a range. Selected-row plots use your chosen rows, including rows with Use unchecked. The figure and exports follow the display choice below.</p>
+            <div id="gridTools" class="grid-tools" role="toolbar" aria-label="Label spreadsheet tools">
+              <span id="gridSelection" role="status">Select cells to edit</span>
+              <button type="button" data-grid-action="all">Select all</button>
+              <button type="button" data-grid-action="copy">Copy</button>
+              <button type="button" data-grid-action="down" title="Ctrl/⌘ D">Fill down</button>
+              <button type="button" data-grid-action="right" title="Ctrl/⌘ R">Fill right</button>
+              <button type="button" data-grid-action="clear">Clear</button>
+              <button type="button" data-grid-action="undo" title="Ctrl/⌘ Z">Undo</button>
+              <button type="button" data-grid-action="redo" title="Ctrl/⌘ Shift Z">Redo</button>
+            </div>
+            <div class="table-scroll">
+              <table id="curveTable">
+                <caption class="visually-hidden">
+                  Curve names, antigens and export selection
+                </caption>
+              </table>
+            </div>
+            <p id="pasteHint" class="help table-hint">
+              Drag or Shift-click to select cells. Click a column heading to select its labels.
+              Copy/paste with Excel; paste one value to fill a selection. Arrow keys and Tab move between cells;
+              Enter moves down. Double-click or F2 edits text. Ctrl/⌘ Z undoes label edits.
+              Selections and bulk edits apply only to visible rows.
+            </p>
+            <details class="plate-panel">
+              <summary>
+                Plate reference <span class="muted">Optional</span>
+              </summary>
+              <p class="help">
+                Paste a plate layout into any well. This is a naming reference;
+                it does not assign labels automatically.
+              </p>
+              <div class="button-row">
+                <button id="clearPlateBtn" class="quiet small">
+                  Clear plate
+                </button>
+              </div>
+              <div class="table-scroll">
+                <table
+                  id="plateGrid"
+                  aria-label="96-well naming reference"
+                ></table>
+              </div>
+            </details>
+          </section>
+          <section class="panel figure-panel" aria-labelledby="figureHeading">
+            <div class="section-head">
+              <div>
+                <h2 id="figureHeading">Figure</h2>
+                <p class="help">
+                  The selected curves, with their own time values.
+                </p>
+              </div>
+              <label class="plot-select"
+                >Display<select id="plotLayout"><option value="group">One plot per plot group</option><option value="overlay">All included curves together</option><option value="selected">Selected rows together</option><option value="source">Source block + plot group (dilution)</option></select></label>
+              <label>Plot group / export table<select id="plotSelect"></select
+              ></label>
+            </div>
+            <div id="plotNotice" class="notice hidden"></div>
+            <div
+              id="figureError"
+              class="message error hidden"
+              role="alert"
+            ></div>
+            <div id="plot" class="plot" aria-live="off"></div>
+            <div id="plotEmpty" class="plot-empty hidden">
+              Include at least one curve to create a figure.
+            </div>
+            <details class="figure-options">
+              <summary>Figure settings</summary>
+              <div class="form-grid figure-grid">
+                <label
+                  >Title<input
+                    id="figureTitle"
+                    placeholder="Use table name" /></label
+                ><label
+                  >X-axis label<input id="xLabel" value="Time (s)" /></label
+                ><label
+                  >Y-axis label<input id="yLabel" value="Response (nm)"
+                /></label>
+                <label
+                  >Width (px)<input
+                    id="figureWidth"
+                    type="number"
+                    value="900"
+                    min="400"
+                    max="2400"
+                    step="1" /></label
+                ><label
+                  >Height (px)<input
+                    id="figureHeight"
+                    type="number"
+                    value="520"
+                    min="300"
+                    max="1600"
+                    step="1" /></label
+                ><label
+                  >Text size (px)<input
+                    id="fontSize"
+                    type="number"
+                    value="14"
+                    min="10"
+                    max="28"
+                /></label>
+                <label
+                  >Line width<input
+                    id="lineWidth"
+                    type="number"
+                    value="2"
+                    min="0.5"
+                    max="6"
+                    step="0.5" /></label
+                ><label
+                  >X minimum<input
+                    id="xMin"
+                    type="number"
+                    step="any"
+                    placeholder="Auto" /></label
+                ><label
+                  >X maximum<input
+                    id="xMax"
+                    type="number"
+                    step="any"
+                    placeholder="Auto"
+                /></label>
+                <label
+                  >Y minimum<input
+                    id="yMin"
+                    type="number"
+                    step="any"
+                    placeholder="Auto" /></label
+                ><label
+                  >Y maximum<input
+                    id="yMax"
+                    type="number"
+                    step="any"
+                    placeholder="Auto" /></label
+                ><label
+                  >Phase marker (s)<input
+                    id="phaseTime"
+                    type="number"
+                    step="any"
+                    placeholder="Optional"
+                /></label>
+                <label class="check"
+                  ><input id="showLegend" type="checkbox" checked /> Show
+                  legend</label
+                ><label class="check"
+                  ><input id="showGrid" type="checkbox" /> Show grid</label
+                ><label
+                  >PNG scale<select id="pngScale">
+                    <option value="2">2×</option>
+                    <option value="3" selected>3×</option>
+                    <option value="4">4×</option>
+                  </select></label
+                >
+              </div>
+              <p class="help">
+                Axis limits crop the figure only. Exports retain all selected
+                data points. The phase marker uses the displayed time basis.
+              </p>
+              <button id="resetFigureBtn" class="quiet small">
+                Reset figure settings
+              </button>
+            </details>
+            <div class="export-bar">
+              <div>
+                <b>Take your work with you</b>
+                <p class="help" id="exportSummary"></p>
+              </div>
+              <div class="button-row">
+                <button id="svgBtn">SVG</button><button id="pngBtn">PNG</button
+                ><button id="xlsxBtn" class="primary">Excel .xlsx</button
+                ><button id="pzfxBtn" class="primary">Prism .pzfx</button>
+              </div>
+            </div>
+            <p class="help export-help">
+              SVG and PNG export the displayed figure. Excel and Prism export
+              every included table. PZFX contains XY data tables; figure styling
+              is saved in the SVG/PNG.
+            </p>
+            <div
+              id="downloadStatus"
+              class="download-status"
+              role="status"
+            ></div>
+            <details class="data-preview">
+              <summary>Inspect exported values</summary>
+              <p id="dataHelp" class="help"></p>
+              <div class="table-scroll"><table id="dataTable"></table></div>
+              <button id="csvBtn" class="quiet small">
+                Download this table as CSV
+              </button>
+            </details>
+          </section>
         </div>
-
-          <div class="buttonRow">
-            <button type="button" class="btn" id="exportPrimaryBtn" disabled>Export XLSX workbook</button>
-            <button type="button" class="btn prism" id="exportPzfxBtn" disabled>Export PZFX file</button>
-          </div>
-          <div class="note" id="exportNote">Exports are normalised to time zero, empty blocks are skipped, and fit columns are included.</div>
-        </div>
-      </section>
-    </div>
-
-    <div class="footer">Built for fast Prism handoff.</div>
-  </main>
-
-<script src="app.js?v=20260704-large-pzfx"></script>
-</body>
+        <footer>
+          Browser-local processing · Original values retained ·
+          <a
+            href="https://github.com/CubeJerry/bli-curves"
+            target="_blank"
+            rel="noopener"
+            >Source &amp; documentation</a
+          >
+        </footer>
+      </div>
+    </main>
+    <noscript
+      >This tool needs JavaScript enabled to process files locally.</noscript
+    >
+    <script src="core.js?v=2"></script>
+    <script src="figure.js?v=2"></script>
+    <script src="app.js?v=2"></script>
+  </body>
 </html>
