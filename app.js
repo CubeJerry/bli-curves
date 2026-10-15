@@ -65,7 +65,7 @@
     return file.well || file.name.replace(/\.[^.]+$/, "");
   }
   function defaultName(file, block) {
-    return `${sourceName(file)}${file.blocks.length > 1 ? ` · curve ${block.blockNumber}` : ""}`;
+    return `${block.sourceLabel || sourceName(file)}${file.blocks.length > 1 ? ` · Plate Column ${block.plateColumn ?? block.blockNumber}` : ""}`;
   }
   function allCurves() {
     return state.files
@@ -76,7 +76,7 @@
             id,
             file,
             block,
-            groupKey: String(block.blockNumber),
+            groupKey: String(block.plateColumn ?? block.blockNumber),
             meta: state.meta[id],
           };
         }),
@@ -129,8 +129,8 @@
         include: true,
         colour: Figure.colourForIndex(Object.keys(state.meta).length),
       };
-      state.seriesNames[String(block.blockNumber)] ??=
-        `Source block ${block.blockNumber}`;
+      state.seriesNames[String(block.plateColumn ?? block.blockNumber)] ??=
+        `Plate Column ${block.plateColumn ?? block.blockNumber}`;
     });
     return file;
   }
@@ -242,7 +242,7 @@
     $("seriesNames").innerHTML = keys
       .map(
         (key) =>
-          `<label>Source block ${esc(key)}<input data-series="${esc(key)}" aria-label="Name for series ${esc(key)}" value="${esc(state.seriesNames[key])}"></label>`,
+          `<label>Plate Column ${esc(key)}<input data-series="${esc(key)}" aria-label="Name for series ${esc(key)}" value="${esc(state.seriesNames[key])}"></label>`,
       )
       .join("");
     show("seriesNames", state.mode === "dilution");
@@ -259,13 +259,13 @@
       .map((c, index) => {
         const sourceSub = dilution
           ? `${state.seriesNames[c.groupKey]} · ${c.file.name}`
-          : `${c.file.name}${c.file.blocks.length > 1 ? ` · source block ${c.block.blockNumber}` : ""}`;
+          : `${c.file.name}${c.file.blocks.length > 1 ? ` · Plate Column ${c.block.plateColumn ?? c.block.blockNumber}` : ""}`;
         const field = dilution ? "concentration" : "name";
         const labelValue = dilution ? c.meta.concentration : c.meta.name;
         const placeholder = dilution
-          ? sourceName(c.file)
+          ? (c.block.sourceLabel || sourceName(c.file))
           : defaultName(c.file, c.block);
-        return `<tr data-id="${esc(c.id)}" class="${c.meta.include ? "" : "excluded"}"><td class="row-handle"><button type="button" data-row-select="${esc(c.id)}" aria-label="Select row ${index + 1}" aria-pressed="false">${index + 1}</button></td><td class="use-cell"><input type="checkbox" data-field="include" ${c.meta.include ? "checked" : ""} aria-label="Include ${esc(c.meta.name)}"></td><td class="source-cell"><strong>${esc(sourceName(c.file))}</strong><small title="${esc(sourceSub)}">${esc(sourceSub)}</small></td><td><input class="cell-input" data-field="${field}" data-row="${index}" data-col="0" value="${esc(labelValue)}" placeholder="${esc(placeholder)}" aria-label="${dilution ? "Concentration or label" : "Curve name"} for ${esc(defaultName(c.file, c.block))}"></td><td><input class="cell-input" data-field="antigen" data-row="${index}" data-col="1" value="${esc(c.meta.antigen)}" placeholder="All curves" aria-label="Antigen for ${esc(defaultName(c.file, c.block))}"></td><td class="colour-cell"><input type="color" data-field="colour" value="${esc(c.meta.colour)}" aria-label="Colour for ${esc(defaultName(c.file, c.block))}"></td></tr>`;
+        return `<tr data-id="${esc(c.id)}" class="${c.meta.include ? "" : "excluded"}"><td class="row-handle"><button type="button" data-row-select="${esc(c.id)}" aria-label="Select row ${index + 1}" aria-pressed="false">${index + 1}</button></td><td class="use-cell"><input type="checkbox" data-field="include" ${c.meta.include ? "checked" : ""} aria-label="Include ${esc(c.meta.name)}"></td><td class="source-cell"><strong>${esc((c.block.sourceLabel || sourceName(c.file)))}</strong><small title="${esc(sourceSub)}">${esc(sourceSub)}</small></td><td><input class="cell-input" data-field="${field}" data-row="${index}" data-col="0" value="${esc(labelValue)}" placeholder="${esc(placeholder)}" aria-label="${dilution ? "Concentration or label" : "Curve name"} for ${esc(defaultName(c.file, c.block))}"></td><td><input class="cell-input" data-field="antigen" data-row="${index}" data-col="1" value="${esc(c.meta.antigen)}" placeholder="All curves" aria-label="Antigen for ${esc(defaultName(c.file, c.block))}"></td><td class="colour-cell"><input type="color" data-field="colour" value="${esc(c.meta.colour)}" aria-label="Colour for ${esc(defaultName(c.file, c.block))}"></td></tr>`;
       })
       .join("");
     $("curveTable").innerHTML =
@@ -282,7 +282,7 @@
         layout === "selected" || layout === "overlay" ? [layout] : layout === "source" && state.mode === "dilution" ? [c.groupKey, antigen] : [antigen],
       );
       const groupName =
-        state.seriesNames[c.groupKey]?.trim() || `Source block ${c.groupKey}`;
+        state.seriesNames[c.groupKey]?.trim() || `Plate Column ${c.groupKey}`;
       const title =
         layout === "selected" ? "Selected curves" : layout === "overlay" ? "All included curves" : layout === "source" && state.mode === "dilution"
           ? [groupName, antigen].filter(Boolean).join(" · ")
@@ -290,7 +290,7 @@
       if (!groups.has(key)) groups.set(key, { id: key, title, curves: [] });
       const label =
         state.mode === "dilution"
-          ? c.meta.concentration.trim() || sourceName(c.file)
+          ? c.meta.concentration.trim() || (c.block.sourceLabel || sourceName(c.file))
           : c.meta.name.trim() || defaultName(c.file, c.block);
       groups.get(key).curves.push({
         id: c.id,
@@ -461,7 +461,7 @@
     $("modeHelp").textContent =
       state.mode === "single"
         ? "One row per measured curve. Antigen labels create separate plots and export tables."
-        : "Label each concentration and assign a plot group. Plot groups control which curves appear together; source blocks are optional subgrouping.";
+        : "Label each concentration and assign a plot group. Plot groups control which curves appear together; Plate Columns are optional subgrouping.";
     $("fitHelp").textContent =
       state.mode === "single"
         ? "Single binding shows measured data by default. No fitting is performed."
@@ -691,11 +691,11 @@
               ? saved.colour
               : Figure.colourForIndex(Object.keys(meta).length),
           };
-          const key = String(block.blockNumber);
+          const key = String(block.plateColumn ?? block.blockNumber);
           seriesNames[key] =
             typeof p.seriesNames?.[key] === "string"
               ? p.seriesNames[key]
-              : `Source block ${key}`;
+              : `Plate Column ${key}`;
         });
       state.selectedRows.clear(); state.rowAnchor = null;
       for (const f of rebuilt) f.blocks.forEach((_, i) => { if (f.saved[i]?.selected === true) state.selectedRows.add(`${f.id}:${i}`); });
@@ -1037,7 +1037,7 @@
       return;
     allCurves().forEach((c) => (c.meta.name = defaultName(c.file, c.block)));
     for (const key of Object.keys(state.seriesNames))
-      state.seriesNames[key] = `Source block ${key}`;
+      state.seriesNames[key] = `Plate Column ${key}`;
     changed();
     renderSeriesNames();
     renderTable();

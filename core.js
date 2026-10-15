@@ -197,6 +197,8 @@
       missingTimeCount = 0,
       omittedEmptyBlocks = 0;
     const invalidExamples = [];
+    const sourceCounts = new Map();
+    const sourceRow = best.rows[best.index - 1] || [];
     for (let index = 0; index < header.length; index++) {
       const timeHeader = columnHeader(header[index]);
       if (timeHeader?.kind !== "time") continue;
@@ -217,9 +219,21 @@
         result.warnings.push(
           `${name}: ignored ${header[index + 2]} because its number does not match ${header[index]}.`,
         );
+      // Combined Octet exports repeat a source label over each Time/Data/Fit triplet.
+      // Do not interpret a metadata key or a numeric row as a source identity.
+      const labelCells = sourceRow.slice(index, index + (hasFit ? 3 : 2));
+      const candidate = labelCells[0] || "";
+      const sourceLabel = labelCells.length === (hasFit ? 3 : 2) &&
+        labelCells.every(value => value === candidate) && candidate &&
+        !columnHeader(candidate) && parseNumber(candidate, result.decimalSeparator).invalid &&
+        !/^(?:Conc|Start|Stop|KObs|KOff)(?:\d+)?$/i.test(candidate) ? candidate : "";
       const number = Number(timeHeader.suffix) || result.blocks.length + 1;
+      const plateColumn = sourceLabel ? (sourceCounts.get(sourceLabel) || 0) + 1 : number;
+      if (sourceLabel) sourceCounts.set(sourceLabel, plateColumn);
       const block = {
         blockNumber: number,
+        sourceLabel,
+        plateColumn,
         fitName: `Fit${number}`,
         fitHeader: hasFit ? header[index + 2] : "",
         timeName: header[index],

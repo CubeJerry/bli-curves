@@ -304,3 +304,32 @@ test("sheet names are legal, unique without case collisions, and bounded", () =>
   assert.equal(core.cleanSheetName("x".repeat(50), used).length, 31);
   assert.equal(core.cleanSheetName("x".repeat(50), used).length, 31);
 });
+
+
+test("combined Octet exports retain source identities, per-source columns and local metadata", () => {
+  const text = [
+    "Conc1,5e-7,,Conc1,5e-7,,Conc1,2.5e-7,,Conc1,2.5e-7,,",
+    "Start1,500,,Start1,1290,,Start1,500,,Start1,1290,,",
+    "t1A2,t1A2,t1A2,t1A2,t1A2,t1A2,t1B2,t1B2,t1B2,t1B2,t1B2,t1B2,",
+    "Time1,Data1,Fit1,Time2,Data2,Fit2,Time3,Data3,Fit3,Time4,Data4,Fit4,",
+    "0,0,0,0,0,0,0,0,0,0,0,0,",
+    "0.2,1,0.9,0.2,2,1.9,0.2,3,NaN,0.2,4,3.9,"
+  ].join("\r\n");
+  const p = core.parseResultFile("combined.csv", text);
+  assert.deepEqual(p.blocks.map(b => b.sourceLabel), ["t1A2","t1A2","t1B2","t1B2"]);
+  assert.deepEqual(p.blocks.map(b => b.plateColumn), [1,2,1,2]);
+  assert.deepEqual(p.blocks.map(b => b.blockNumber), [1,2,3,4]);
+  assert.deepEqual(p.blocks.map(b => b.concentration), ["5e-7","5e-7","2.5e-7","2.5e-7"]);
+  assert.deepEqual(p.blocks.map(b => b.start), ["500","1290","500","1290"]);
+  assert.deepEqual(p.blocks.map(b => b.rows[1].data), [1,2,3,4]);
+  assert.equal(p.blocks[2].rows[1].fit, null);
+  assert.deepEqual(p.warnings, []);
+});
+
+test("metadata and ordinary headers do not invent combined source identities", () => {
+  for (const prefix of ["", "Conc1\t5e-7\t\n", "0\t0\t0\n", "NaN\tNaN\tNaN\n"]) {
+    const p = parsed(prefix + "Time1\tData1\tFit1\n0\t1\t1");
+    assert.equal(p.blocks[0].sourceLabel, "");
+    assert.equal(p.blocks[0].plateColumn, 1);
+  }
+});
