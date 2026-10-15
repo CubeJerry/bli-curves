@@ -14,19 +14,28 @@ repository and open `index.html`. The five app files must stay together:
    blocks, optionally with `Fit` columns. Add more files at any time. An
    identical filename/content pair is skipped; different files with the same
    filename remain separate. UTF-8 and BOM-marked UTF-16 are accepted.
-2. **Choose the experiment.** Single binding treats each block independently.
-   Dilution series groups matching numbered blocks across files. Names and
-   selections survive switching modes.
-3. **Label and select.** Rename curves (or series), assign antigens, and exclude
-   unwanted curves. Paste a rectangular block from Excel into the two label
-   columns. Enter moves down; Shift-click or Shift-arrow selects cells;
-   Ctrl/Cmd+C copies a selection. Pasting one value fills a selected range.
-4. **Check the figure.** Antigens create separate plots and data tables. Use the
-   plot selector to inspect each. Imported fits are off by default for single
-   binding and on for dilution series; the app does not calculate new fits.
+2. **Choose the experiment.** Single binding labels individual curves. Dilution
+   mode labels concentrations and enables imported fits by default. Source
+   block names are optional subgrouping, not the default plotting layout.
+3. **Edit labels like a spreadsheet.** Drag or Shift-click to select a rectangle,
+   or click a label-column heading to select the column. Copy, cut and paste
+   blocks with Excel; one pasted value fills the selection. Arrow keys and Tab
+   navigate; Enter moves down. Double-click or F2 edits text. Use Fill down,
+   Fill right, Clear, Undo and Redo in the toolbar (Ctrl/Cmd+D, R, Z and Shift+Z).
+   Bulk edits apply only to visible rows.
+4. **Choose curves to compare.** Filter and sort by antigen / plot group. The
+   default is one plot per group. To compare arbitrary curves, click row
+   numbers to toggle them, Shift-click for a range, or select all shown rows,
+   then choose **Plot selected rows together**. Selections survive filtering;
+   the selected-row count identifies hidden rows. This explicit selection
+   overrides the Use checkboxes. Other display choices use included curves:
+   all curves together, per plot group, or source block plus group for dilution.
 5. **Export.** SVG and PNG save the displayed figure. XLSX and PZFX contain all
-   included tables. CSV saves the displayed table. Save a `.bli.json` project
-   to retain source text, names, selections, colours, plate notes and settings.
+   tables in the chosen display layout; CSV saves the displayed table. Selected
+   rows therefore produce a comparison export as well as a comparison plot.
+   Save a `.bli.json` project to retain source text, labels, selected rows,
+   display layout, colours, plate notes and settings. Imported fits are dotted;
+   measured curves are solid. The app does not calculate new fits.
 
 `Try example data` adds clearly named synthetic sensorgrams. They demonstrate
 the workflow, not instrument validation or experimental results.
